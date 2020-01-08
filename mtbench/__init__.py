@@ -5,13 +5,16 @@ import numpy as np
 
 from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens, plot_beachball
-from mtuq.grid import DoubleCoupleGridRegular
 from mtuq.grid_search import grid_search
-from mtuq.util.cap import parse, Trapezoid
+from mtuq.util.cap import parse_station_codes, Trapezoid
+
+
+def progress(_i, _n):
+    print('\nEVENT %d of %d\n' % (_i, _n))
 
 
 def benchmark(
-    event_name,
+    event_id,
     path_data,
     path_greens,
     path_weights,
@@ -21,23 +24,16 @@ def benchmark(
     process_sw,
     misfit_bw,
     misfit_sw,
+    sources,
     magnitude,
     depth,
     verbose=True):
 
 
     if verbose:
-        print('event:   %s' % event_name)
+        print('event:   %s' % event_id)
         print('data:    %s' % path_data)
         print('weights: %s\n' % path_weights)
-
-
-    sources = DoubleCoupleGridRegular(
-        npts_per_axis=50,
-        magnitude=magnitude)
-
-    wavelet = Trapezoid(
-        magnitude=magnitude)
 
 
     #
@@ -47,13 +43,9 @@ def benchmark(
     print('Reading data...\n')
 
     data = read(path_data, format='sac',
-        event_id=event_name,
+        event_id=event_id,
+        station_id_list=parse_station_codes(path_weights),
         tags=['units:cm', 'type:velocity']) 
-
-
-    # select stations with nonzero weights
-    stations_list = parse(path_weights)
-    data.select(stations_list)
 
     data.sort_by_distance()
     stations = data.get_stations()
@@ -75,7 +67,7 @@ def benchmark(
         db = open_db(path_greens, format=solver)
         greens = db.get_greens_tensors(stations, origin, model)
 
-    greens.convolve(wavelet)
+    greens.convolve(Trapezoid(magnitude=magnitude))
     if process_bw:
         greens_bw = greens.map(process_bw)
     if process_sw:
@@ -116,11 +108,11 @@ def benchmark(
 
     print('Saving results...\n')
 
-    plot_data_greens(event_name+'.png', 
+    plot_data_greens(event_id+'.png', 
         data_bw, data_sw, greens_bw, greens_sw, process_bw, process_sw, 
         misfit_bw, misfit_sw, stations, origin, best_source)
 
-    plot_beachball(event_name+'_beachball.png', best_source)
+    plot_beachball(event_id+'_beachball.png', best_source)
 
     print('Finished\n')
 

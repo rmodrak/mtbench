@@ -98,7 +98,7 @@ selected = [
 
 
 def data_processing_handles(
-        path_weights):
+        path_greens, path_weights):
 
     process_bw = ProcessData(
         filter_type='Bandpass',
@@ -175,6 +175,6 @@ def basepath():
 
 
 def fullpath(*args):
-    return join(basepath(), 'input/SilwalTape2016/50Hz', *args)
+    return join(basepath(), 'input/SilwalTape2016', *args)
 
 
