@@ -1,10 +1,11 @@
+# This scripts generates all the other scripts found in mtbench/scripts
 
 
 Imports="""#!/usr/bin/env python
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.SilwalTape2016 import names, depths, magnitudes, selected,\
+from mtbench.REFERENCE import names, depths, magnitudes, selected,\
     data_processing_handles, misfit_handles, fullpath
 from mtuq.grid import DoubleCoupleGridRegular
 
@@ -16,7 +17,7 @@ if __name__=='__main__':
     _i, _n = 1, len(selected)
 
     #
-    # loop over selected events from SilwalTape2016
+    # loop over selected events from REFERENCE
     #
 """
 
@@ -84,10 +85,14 @@ if __name__=='__main__':
         lines += Main
 
         lines = re.sub(
+            'REFERENCE',
+            'SilwalTape2016',
+            lines)
+
+        lines = re.sub(
             'MODEL',
             '"ak135f_scak"',
             lines)
-
 
         lines = re.sub(
             'SOLVER',
@@ -107,6 +112,11 @@ if __name__=='__main__':
         lines += Imports
         lines += Docstring
         lines += Main
+
+        lines = re.sub(
+            'REFERENCE',
+            'SilwalTape2016',
+            lines)
 
         lines = re.sub(
             'MODEL',
@@ -138,6 +148,11 @@ if __name__=='__main__':
         lines += Main
 
         lines = re.sub(
+            'REFERENCE',
+            'SilwalTape2016',
+            lines)
+
+        lines = re.sub(
             'MODEL',
             '"ak135"',
             lines)
@@ -153,4 +168,116 @@ if __name__=='__main__':
             lines)
 
         file.write(lines)
+
+
+    #
+    # AlvizuriTape2018
+    #
+
+    with open('AlvizuriTape2018/run_AxiSEM.py', 'w') as file:
+        lines = ''
+        lines += Imports
+        lines += Docstring
+        lines += Main
+
+        lines = re.sub(
+            'REFERENCE',
+            'AlvizuriTape2018',
+            lines)
+
+        lines = re.sub(
+            'MODEL',
+            '"ak135f_mdj2"',
+            lines)
+
+        lines = re.sub(
+            'SOLVER',
+            '"AxiSEM"',
+            lines)
+
+        lines = re.sub(
+            'PATH_GREENS',
+            '"/home/rmodrak/data/axisem/ak135f_mdj2-2s"',
+            lines)
+
+        lines = re.sub(
+            'DoubleCouple',
+            'FullMomentTensor',
+            lines)
+
+        file.write(lines)
+
+
+    with open('AlvizuriTape2018/run_FK.py', 'w') as file:
+        lines = ''
+        lines += Imports
+        lines += Docstring
+        lines += Main
+
+        lines = re.sub(
+            'REFERENCE',
+            'AlvizuriTape2018',
+            lines)
+
+        lines = re.sub(
+            'MODEL',
+            '"MDJ2"',
+            lines)
+
+        lines = re.sub(
+            'PATH_GREENS',
+            '"/home/rmodrak/data/FK/MDJ2"',
+            lines)
+
+        lines = re.sub(
+            'SOLVER',
+            '"FK"',
+            lines)
+
+        lines = re.sub(
+            'data_processing_handles',
+            'data_processing_handles_FK',
+            lines)
+
+        lines = re.sub(
+            'DoubleCouple',
+            'FullMomentTensor',
+            lines)
+
+        file.write(lines)
+
+
+    with open('AlvizuriTape2018/run_syngine.py', 'w') as file:
+        lines = ''
+        lines += Imports
+        lines += Docstring
+        lines += Main
+
+        lines = re.sub(
+            'REFERENCE',
+            'AlvizuriTape2018',
+            lines)
+
+        lines = re.sub(
+            'MODEL',
+            '"ak135"',
+            lines)
+
+        lines = re.sub(
+            'SOLVER',
+            '"syngine"',
+            lines)
+
+        lines = re.sub(
+            'PATH_GREENS',
+            '"http://service.iris.edu/irisws/syngine/1"',
+            lines)
+
+        lines = re.sub(
+            'DoubleCouple',
+            'FullMomentTensor',
+            lines)
+
+        file.write(lines)
+
 
