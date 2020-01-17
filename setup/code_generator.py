@@ -5,8 +5,8 @@ Imports="""#!/usr/bin/env python
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.REFERENCE import names, depths, magnitudes, selected,\
-    data_processing_handles, misfit_handles, fullpath
+from mtbench.REFERENCE import fullpath, names, depths, magnitudes,\\
+    data_processing_handles, misfit_handles, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
 
 """
@@ -14,7 +14,7 @@ from mtuq.grid import DoubleCoupleGridRegular
 
 Docstring="""
 if __name__=='__main__':
-    _i, _n = 1, len(selected)
+    _i, _n = 1, len(selected_events)
 
     #
     # loop over selected events from REFERENCE
@@ -23,7 +23,7 @@ if __name__=='__main__':
 
 
 Main="""
-    for index in selected:
+    for index in selected_events:
         progress(_i, _n)
 
         event_id = names[index]
@@ -71,14 +71,69 @@ Main="""
 """
 
 
+Main2="""
+    for index in selected_events:
+        progress(_i, _n)
+
+        event_id = names[index]
+        depth = depths[index]
+        magnitude = magnitudes[index]
+
+        source = expected_results[index]
+
+        model = MODEL
+        solver = SOLVER
+
+        path_data, path_weights, path_greens = (
+            fullpath(event_id, '*BH.[zrt]'),
+            fullpath(event_id, 'weights.dat'),
+            "/home/rmodrak/data/FK/MDJ2",
+            )
+
+        #from mtbench.Alvizuri2018 import to_mij
+        from mtpar import tt2cmt
+        to_mij = lambda kappa, theta, sigma, M0, gamma, delta : tt2cmt(gamma, delta, M0, kappa, theta, sigma)
+
+        sources = UnstructuredGrid(
+            source.items(),
+            callback=to_mij)
+
+        process_bw, process_sw = data_processing_handles(
+            path_greens, path_weights,
+            )
+
+        misfit_bw, misfit_sw = misfit_handles(
+            )
+
+        benchmark(
+            event_id,
+            path_data,
+            path_greens,
+            path_weights,
+            solver,
+            model,
+            process_bw,
+            process_sw,
+            misfit_bw,
+            misfit_sw,
+            sources,
+            magnitude,
+            depth)
+
+        _i += 1
+
+"""
+
+
+
 if __name__=='__main__':
     import re
 
     #
-    # SilwalTape2016
+    # Silwal2016
     #
 
-    with open('SilwalTape2016/run_AxiSEM.py', 'w') as file:
+    with open('scripts/run_Silwal2016_AxiSEM.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -86,7 +141,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'SilwalTape2016',
+            'Silwal2016',
             lines)
 
         lines = re.sub(
@@ -107,7 +162,7 @@ if __name__=='__main__':
         file.write(lines)
 
 
-    with open('SilwalTape2016/run_FK.py', 'w') as file:
+    with open('scripts/run_Silwal2016_FK.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -115,7 +170,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'SilwalTape2016',
+            'Silwal2016',
             lines)
 
         lines = re.sub(
@@ -141,7 +196,7 @@ if __name__=='__main__':
         file.write(lines)
 
 
-    with open('SilwalTape2016/run_syngine.py', 'w') as file:
+    with open('scripts/run_Silwal2016_syngine.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -149,7 +204,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'SilwalTape2016',
+            'Silwal2016',
             lines)
 
         lines = re.sub(
@@ -171,10 +226,10 @@ if __name__=='__main__':
 
 
     #
-    # AlvizuriTape2018
+    # Alvizuri2018
     #
 
-    with open('AlvizuriTape2018/run_AxiSEM.py', 'w') as file:
+    with open('scripts/run_Alvizuri2018_AxiSEM.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -182,7 +237,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'AlvizuriTape2018',
+            'Alvizuri2018',
             lines)
 
         lines = re.sub(
@@ -208,7 +263,7 @@ if __name__=='__main__':
         file.write(lines)
 
 
-    with open('AlvizuriTape2018/run_FK.py', 'w') as file:
+    with open('scripts/run_Alvizuri2018_FK.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -216,7 +271,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'AlvizuriTape2018',
+            'Alvizuri2018',
             lines)
 
         lines = re.sub(
@@ -247,7 +302,7 @@ if __name__=='__main__':
         file.write(lines)
 
 
-    with open('AlvizuriTape2018/run_syngine.py', 'w') as file:
+    with open('scripts/run_Alvizuri2018_syngine.py', 'w') as file:
         lines = ''
         lines += Imports
         lines += Docstring
@@ -255,7 +310,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'REFERENCE',
-            'AlvizuriTape2018',
+            'Alvizuri2018',
             lines)
 
         lines = re.sub(
@@ -280,4 +335,43 @@ if __name__=='__main__':
 
         file.write(lines)
 
+
+    with open('scripts/benchmark_Alvizuri2018.py', 'w') as file:
+        lines = ''
+        lines += Imports
+        lines += Docstring
+        lines += Main2
+
+        lines = re.sub(
+            'REFERENCE',
+            'Alvizuri2018',
+            lines)
+
+        lines = re.sub(
+            'MODEL',
+            '"MDJ2"',
+            lines)
+
+        lines = re.sub(
+            'SOLVER',
+            '"FK"',
+            lines)
+
+        lines = re.sub(
+            'PATH_GREENS',
+            '"/home/rmodrak/data/FK/MDJ2"',
+            lines)
+
+        lines = re.sub(
+            'DoubleCoupleGridRegular',
+            'UnstructuredGrid',
+            lines)
+
+        lines = re.sub(
+            'data_processing_handles',
+            'data_processing_handles_FK',
+            lines)
+
+
+        file.write(lines)
 

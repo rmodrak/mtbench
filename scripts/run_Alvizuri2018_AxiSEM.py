@@ -2,34 +2,35 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.SilwalTape2016 import names, depths, magnitudes, selected,    data_processing_handles, misfit_handles, fullpath
-from mtuq.grid import DoubleCoupleGridRegular
+from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes,\
+    data_processing_handles, misfit_handles, selected_events, expected_results
+from mtuq.grid import FullMomentTensorGridRegular
 
 
 if __name__=='__main__':
-    _i, _n = 1, len(selected)
+    _i, _n = 1, len(selected_events)
 
     #
-    # loop over selected events from SilwalTape2016
+    # loop over selected events from Alvizuri2018
     #
 
-    for index in selected:
+    for index in selected_events:
         progress(_i, _n)
 
         event_id = names[index]
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "ak135"
-        solver = "syngine"
+        model = "ak135f_mdj2"
+        solver = "AxiSEM"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
             fullpath(event_id, 'weights.dat'),
-            "http://service.iris.edu/irisws/syngine/1",
+            "/home/rmodrak/data/axisem/ak135f_mdj2-2s",
             )
 
-        sources = DoubleCoupleGridRegular(
+        sources = FullMomentTensorGridRegular(
             npts_per_axis=15,
             magnitude=magnitude,
             )

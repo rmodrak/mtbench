@@ -2,31 +2,32 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.SilwalTape2016 import names, depths, magnitudes, selected,    data_processing_handles_FK, misfit_handles, fullpath
+from mtbench.Silwal2016 import fullpath, names, depths, magnitudes,\
+    data_processing_handles, misfit_handles, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
 
 
 if __name__=='__main__':
-    _i, _n = 1, len(selected)
+    _i, _n = 1, len(selected_events)
 
     #
-    # loop over selected events from SilwalTape2016
+    # loop over selected events from Silwal2016
     #
 
-    for index in selected:
+    for index in selected_events:
         progress(_i, _n)
 
         event_id = names[index]
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "scak"
-        solver = "FK"
+        model = "ak135f_scak"
+        solver = "AxiSEM"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
             fullpath(event_id, 'weights.dat'),
-            "/store/wf/FK_synthetics/scak",
+            "/home/rmodrak/data/axisem/ak135f_scak-2s",
             )
 
         sources = DoubleCoupleGridRegular(
@@ -34,7 +35,7 @@ if __name__=='__main__':
             magnitude=magnitude,
             )
 
-        process_bw, process_sw = data_processing_handles_FK(
+        process_bw, process_sw = data_processing_handles(
             path_greens, path_weights,
             )
 

@@ -2,31 +2,32 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.AlvizuriTape2018 import names, depths, magnitudes, selected,    data_processing_handles, misfit_handles, fullpath
+from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes,\
+    data_processing_handles_FK, misfit_handles, selected_events, expected_results
 from mtuq.grid import FullMomentTensorGridRegular
 
 
 if __name__=='__main__':
-    _i, _n = 1, len(selected)
+    _i, _n = 1, len(selected_events)
 
     #
-    # loop over selected events from AlvizuriTape2018
+    # loop over selected events from Alvizuri2018
     #
 
-    for index in selected:
+    for index in selected_events:
         progress(_i, _n)
 
         event_id = names[index]
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "ak135f_mdj2"
-        solver = "AxiSEM"
+        model = "MDJ2"
+        solver = "FK"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
             fullpath(event_id, 'weights.dat'),
-            "/home/rmodrak/data/axisem/ak135f_mdj2-2s",
+            "/home/rmodrak/data/FK/MDJ2",
             )
 
         sources = FullMomentTensorGridRegular(
@@ -34,7 +35,7 @@ if __name__=='__main__':
             magnitude=magnitude,
             )
 
-        process_bw, process_sw = data_processing_handles(
+        process_bw, process_sw = data_processing_handles_FK(
             path_greens, path_weights,
             )
 
