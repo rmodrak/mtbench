@@ -78,7 +78,7 @@ magnitudes = [
     4.60,
     ]
 
-selected = [
+selected_events = [
     0,    
     1, 
     2,
@@ -95,6 +95,9 @@ selected = [
     16,
     20,
     ]
+
+
+expected_results = None
 
 
 def data_processing_handles(
@@ -175,6 +178,6 @@ def basepath():
 
 
 def fullpath(*args):
-    return join(basepath(), 'input/SilwalTape2016', *args)
+    return join(basepath(), 'input/Silwal2016', *args)
 
 

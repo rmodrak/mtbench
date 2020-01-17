@@ -53,6 +53,7 @@ def benchmark(
     origin = data.get_origins()[0]
     origin.depth_in_m = depth
 
+
     if process_bw:
         data_bw = data.map(process_bw)
     if process_sw:
@@ -60,12 +61,8 @@ def benchmark(
 
 
     print('Reading Green''s functions...\n')
-
-    if solver.lower() == 'syngine':
-        greens = download_greens_tensors(stations, origin, model)
-    else:
-        db = open_db(path_greens, format=solver)
-        greens = db.get_greens_tensors(stations, origin, model)
+    db = open_db(path_greens, format=solver)
+    greens = db.get_greens_tensors(stations, origin, model)
 
     greens.convolve(Trapezoid(magnitude=magnitude))
     if process_bw:
