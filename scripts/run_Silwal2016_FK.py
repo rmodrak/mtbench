@@ -32,7 +32,7 @@ if __name__=='__main__':
 
         sources = DoubleCoupleGridRegular(
             npts_per_axis=15,
-            magnitude=magnitude,
+            magnitudes=[magnitude],
             )
 
         process_bw, process_sw = data_processing_handles_FK(

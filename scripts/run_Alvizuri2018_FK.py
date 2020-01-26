@@ -2,9 +2,11 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes,\
+from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes_Fig2,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
 from mtuq.grid import FullMomentTensorGridRegular
+
+magnitudes = magnitudes_Fig2
 
 
 if __name__=='__main__':
@@ -32,7 +34,7 @@ if __name__=='__main__':
 
         sources = FullMomentTensorGridRegular(
             npts_per_axis=15,
-            magnitude=magnitude,
+            magnitudes=[magnitude],
             )
 
         process_bw, process_sw = data_processing_handles_FK(

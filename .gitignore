@@ -8,6 +8,7 @@ __pycache__/
 *.swp
 
 gmt.history
+*.ps
 
 input/
 

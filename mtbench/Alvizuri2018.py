@@ -164,6 +164,7 @@ def data_processing_handles(
         window_type='surface_wave',
         window_length=400.,
         capuaf_file=path_weights,
+        apply_statics=True,
         ) 
 
     return process_bw, process_sw
@@ -206,8 +207,8 @@ def misfit_handles():
         )
 
     misfit_sw = Misfit(
-        time_shift_min=-50.,
-        time_shift_max=+50.,
+        time_shift_min=-5.,
+        time_shift_max=+5.,
         time_shift_groups=['ZR','T'],
         )
 

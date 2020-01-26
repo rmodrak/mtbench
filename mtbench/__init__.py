@@ -54,10 +54,8 @@ def benchmark(
     origin.depth_in_m = depth
 
 
-    if process_bw:
-        data_bw = data.map(process_bw)
-    if process_sw:
-        data_sw = data.map(process_sw)
+    data_bw = data.map(process_bw)
+    data_sw = data.map(process_sw)
 
 
     print('Reading Green''s functions...\n')
@@ -65,38 +63,24 @@ def benchmark(
     greens = db.get_greens_tensors(stations, origin, model)
 
     greens.convolve(Trapezoid(magnitude=magnitude))
-    if process_bw:
-        greens_bw = greens.map(process_bw)
-    if process_sw:
-        greens_sw = greens.map(process_sw)
+    greens_bw = greens.map(process_bw)
+    greens_sw = greens.map(process_sw)
 
 
     #
     # The main computational work starts nows
     #
 
-    if misfit_bw:
-        print('Evaluating body wave misfit...\n')
+    print('Evaluating body wave misfit...\n')
+    results_bw = grid_search(data_bw, greens_bw, misfit_bw, origin, sources)
 
-        results_bw = grid_search(
-            data_bw, greens_bw, misfit_bw, origin, sources)
+    print('Evaluating surface wave misfit...\n')
+    results_sw = grid_search(data_sw, greens_sw, misfit_sw, origin, sources)
 
-    else:
-        results_bw = np.zeros(len(sources))
+    results_sum = results_bw + results_sw
 
-
-    if misfit_sw:
-        print('Evaluating surface wave misfit...\n')
-
-        results_sw = grid_search(
-            data_sw, greens_sw, misfit_sw, origin, sources)
-
-    else:
-        results_sw = np.zeros(len(sources))
-
-
-    best_misfit = (results_bw + results_sw).min()
-    best_source = sources.get((results_bw + results_sw).argmin())
+    best_misfit = (results_sum).min()
+    best_source = sources.get((results_sum).argmin())
 
 
     #
