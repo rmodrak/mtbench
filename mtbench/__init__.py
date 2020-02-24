@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens, plot_beachball
+from mtuq.graphics import plot_data_greens, plot_beachball, plot_misfit
 from mtuq.grid_search import grid_search
 from mtuq.util.cap import parse_station_codes, Trapezoid
 
@@ -24,7 +24,7 @@ def benchmark(
     process_sw,
     misfit_bw,
     misfit_sw,
-    sources,
+    grid,
     magnitude,
     depth,
     verbose=True):
@@ -72,15 +72,18 @@ def benchmark(
     #
 
     print('Evaluating body wave misfit...\n')
-    results_bw = grid_search(data_bw, greens_bw, misfit_bw, origin, sources)
+    results_bw = grid_search(data_bw, greens_bw, misfit_bw, origin, grid)
 
     print('Evaluating surface wave misfit...\n')
-    results_sw = grid_search(data_sw, greens_sw, misfit_sw, origin, sources)
+    results_sw = grid_search(data_sw, greens_sw, misfit_sw, origin, grid)
 
     results_sum = results_bw + results_sw
 
     best_misfit = (results_sum).min()
-    best_source = sources.get((results_sum).argmin())
+    best_source = grid.get(results_sum.argmin())
+
+    lune_dict = grid.get_dict(results_sum.argmin())
+
 
 
     #
@@ -91,9 +94,11 @@ def benchmark(
 
     plot_data_greens(event_id+'.png', 
         data_bw, data_sw, greens_bw, greens_sw, process_bw, process_sw, 
-        misfit_bw, misfit_sw, stations, origin, best_source)
+        misfit_bw, misfit_sw, stations, origin, best_source, lune_dict)
 
     plot_beachball(event_id+'_beachball.png', best_source)
+
+    plot_misfit(event_id+'_misfit.ps', grid, results_sum)
 
     print('Finished\n')
 
