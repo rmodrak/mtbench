@@ -2,11 +2,9 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes_Fig2,\
+from mtbench.Alvizuri2018 import fullpath, names, depths, magnitudes,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
 from mtuq.grid import FullMomentTensorGridRegular
-
-magnitudes = magnitudes_Fig2
 
 
 if __name__=='__main__':
@@ -32,7 +30,7 @@ if __name__=='__main__':
             "/home/rmodrak/data/FK/MDJ2",
             )
 
-        sources = FullMomentTensorGridRegular(
+        grid = FullMomentTensorGridRegular(
             npts_per_axis=15,
             magnitudes=[magnitude],
             )
@@ -55,7 +53,7 @@ if __name__=='__main__':
             process_sw,
             misfit_bw,
             misfit_sw,
-            sources,
+            grid,
             magnitude,
             depth)
 

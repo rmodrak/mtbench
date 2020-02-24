@@ -39,7 +39,7 @@ Main="""
             PATH_GREENS,
             )
 
-        sources = DoubleCoupleGridRegular(
+        grid = DoubleCoupleGridRegular(
             npts_per_axis=15,
             magnitudes=[magnitude],
             )
@@ -62,7 +62,7 @@ Main="""
             process_sw,
             misfit_bw,
             misfit_sw,
-            sources,
+            grid,
             magnitude,
             depth)
 
@@ -94,7 +94,7 @@ Main2="""
         from mtpar import tt2cmt
         to_mij = lambda kappa, theta, sigma, M0, gamma, delta : tt2cmt(gamma, delta, M0, kappa, theta, sigma)
 
-        sources = UnstructuredGrid(
+        grid = UnstructuredGrid(
             source.items(),
             callback=to_mij)
 
@@ -116,7 +116,7 @@ Main2="""
             process_sw,
             misfit_bw,
             misfit_sw,
-            sources,
+            grid,
             magnitude,
             depth)
 

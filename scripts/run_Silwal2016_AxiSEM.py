@@ -30,7 +30,7 @@ if __name__=='__main__':
             "/home/rmodrak/data/axisem/ak135f_scak-2s",
             )
 
-        sources = DoubleCoupleGridRegular(
+        grid = DoubleCoupleGridRegular(
             npts_per_axis=15,
             magnitudes=[magnitude],
             )
@@ -53,7 +53,7 @@ if __name__=='__main__':
             process_sw,
             misfit_bw,
             misfit_sw,
-            sources,
+            grid,
             magnitude,
             depth)
 

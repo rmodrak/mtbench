@@ -36,7 +36,7 @@ if __name__=='__main__':
         from mtpar import tt2cmt
         to_mij = lambda kappa, theta, sigma, M0, gamma, delta : tt2cmt(gamma, delta, M0, kappa, theta, sigma)
 
-        sources = UnstructuredGrid(
+        grid = UnstructuredGrid(
             source.items(),
             callback=to_mij)
 
@@ -58,7 +58,7 @@ if __name__=='__main__':
             process_sw,
             misfit_bw,
             misfit_sw,
-            sources,
+            grid,
             magnitude,
             depth)
 
