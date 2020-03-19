@@ -2,7 +2,7 @@
 
 import numpy as np
 from mtbench import benchmark, progress
-from mtbench.Silwal2016 import fullpath, names, depths, magnitudes,\
+from _Silwal2016 import fullpath, names, depths, magnitudes,\
     data_processing_handles, misfit_handles, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
 
