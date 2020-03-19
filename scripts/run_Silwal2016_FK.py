@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from mtbench import benchmark, progress
+from mtbench import grid_search, progress
 from _Silwal2016 import fullpath, names, depths, magnitudes,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
@@ -42,7 +42,7 @@ if __name__=='__main__':
         misfit_bw, misfit_sw = misfit_handles(
             )
 
-        benchmark(
+        grid_search(
             event_id,
             path_data,
             path_greens,

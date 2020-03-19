@@ -4,7 +4,8 @@ import os
 import numpy as np
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens, plot_beachball, plot_misfit
+from mtuq.graphics import plot_data_greens, plot_beachball
+from mtuq.graphics.uq_vw import plot_likelihood_vw, plot_misfit_vw
 from mtuq.grid_search import grid_search
 from mtuq.util.cap import parse_station_codes, Trapezoid
 
@@ -13,7 +14,7 @@ def progress(_i, _n):
     print('\nEVENT %d of %d\n' % (_i, _n))
 
 
-def benchmark(
+def grid_search(
     event_id,
     path_data,
     path_greens,
@@ -53,7 +54,6 @@ def benchmark(
     origin = data.get_origins()[0]
     origin.depth_in_m = depth
 
-
     data_bw = data.map(process_bw)
     data_sw = data.map(process_sw)
 
@@ -81,7 +81,6 @@ def benchmark(
 
     best_misfit = (results_sum).min()
     best_source = grid.get(results_sum.argmin())
-
     lune_dict = grid.get_dict(results_sum.argmin())
 
 
