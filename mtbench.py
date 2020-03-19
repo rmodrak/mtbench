@@ -98,7 +98,7 @@ def benchmark(
 
     plot_beachball(event_id+'_beachball.png', best_source)
 
-    plot_misfit(event_id+'_misfit.ps', grid, results_sum)
+    grid.save(event_id+'.nc', results_sum)
 
     print('Finished\n')
 

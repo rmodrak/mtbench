@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from os.path import abspath, join
+from os.path import abspath, dirname, join
 from mtuq.misfit import Misfit
 from mtuq.process_data import ProcessData
 
@@ -69,12 +69,12 @@ magnitudes_Fig2_caption = [
 
 
 selected_events = [
-   #0,    
+    0,    
   ##1, 
     2,
-   #3,
+    3,
   ##4,
-   #5,
+    5,
   ##6,
   ##7,
   ##8,
@@ -217,7 +217,7 @@ def misfit_handles():
 
 def basepath():
     import mtbench
-    return abspath(join(mtbench.__path__[0], '..'))
+    return abspath(dirname(mtbench.__file__))
 
 
 def fullpath(*args):

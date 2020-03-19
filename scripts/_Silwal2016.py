@@ -174,7 +174,7 @@ def misfit_handles():
 
 def basepath():
     import mtbench
-    return abspath(join(mtbench.__path__[0], '..'))
+    return abspath(dirname(mtbench.__file__))
 
 
 def fullpath(*args):
