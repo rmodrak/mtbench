@@ -4,7 +4,7 @@
 Imports="""#!/usr/bin/env python
 
 import numpy as np
-from mtbench import grid_search, progress
+from mtbench import run_grid_search, progress
 from _REFERENCE import fullpath, names, depths, magnitudes,\\
     data_processing_handles, misfit_handles, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
@@ -51,7 +51,7 @@ Main="""
         misfit_bw, misfit_sw = misfit_handles(
             )
 
-        grid_search(
+        run_grid_search(
             event_id,
             path_data,
             path_greens,

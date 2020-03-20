@@ -8,13 +8,16 @@ from mtuq.graphics import plot_data_greens, plot_beachball
 from mtuq.graphics.uq_vw import plot_likelihood_vw, plot_misfit_vw
 from mtuq.grid_search import grid_search
 from mtuq.util.cap import parse_station_codes, Trapezoid
+from mtuq.util.math import list_intersect_with_indices
+from mtuq.util.signal import get_components
+
 
 
 def progress(_i, _n):
     print('\nEVENT %d of %d\n' % (_i, _n))
 
 
-def grid_search(
+def run_grid_search(
     event_id,
     path_data,
     path_greens,

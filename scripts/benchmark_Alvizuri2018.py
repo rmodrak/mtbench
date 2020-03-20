@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from mtbench import grid_search, progress
+from mtbench import run_grid_search, progress
 from _Alvizuri2018 import fullpath, names, depths, magnitudes,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
 from mtuq.grid import UnstructuredGrid
