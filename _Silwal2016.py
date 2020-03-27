@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
-from os.path import abspath, join
+
+from os.path import abspath, dirname, join
 from mtuq.misfit import Misfit
 from mtuq.process_data import ProcessData
 
@@ -79,20 +80,20 @@ magnitudes = [
     ]
 
 selected_events = [
-    0,    
-    1, 
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    12,
-    13,
-    14,
-    16,
+   #0,    
+   #1, 
+   #2,
+  ##3,
+   #4,
+   #5,
+  ##6,
+   #7,
+   #8,
+   #9,
+   #12,
+   #13,
+   #14,
+  ##16,
     20,
     ]
 

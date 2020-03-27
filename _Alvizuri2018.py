@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+
 from os.path import abspath, dirname, join
 from mtuq.misfit import Misfit
 from mtuq.process_data import ProcessData
