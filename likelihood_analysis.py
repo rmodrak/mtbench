@@ -8,6 +8,7 @@ from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens, plot_beachball
 from mtuq.graphics.uq import plot_likelihood, plot_marginal, plot_misfit
 from mtuq.grid_search import grid_search
+from mtuq.misfit.level0 import estimate_sigma
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
 from mtuq.util.signal import get_components
@@ -118,7 +119,7 @@ def likelihood_analysis(
         components = misfit_function_handles[_i].time_shift_groups
 
         sigma += [estimate_sigma(processed_data[_i], processed_greens[_i],
-            best_source, 'L2', time_shift_min, time_shift_max, components[0])]
+            best_source, 'L2', components[0], time_shift_min, time_shift_max)]
 
 
     normalized_values = []
@@ -155,67 +156,5 @@ def likelihood_analysis(
     print('Finished\n')
 
 
-
-
-def estimate_sigma(data, greens, source, norm='L2', time_shift_min=0., time_shift_max=0., components=['ZR']):
-
-    # error checking
-    assert norm in ('L1', 'L2')
-
-
-    residuals = []
-
-    for _j, d in enumerate(data):
-        _components, indices = list_intersect_with_indices(
-            components, get_components(d))
-
-        if not indices:
-            continue
-
-        # generate synthetics
-        greens[_j]._set_components(_components)
-        s = greens[_j].get_synthetics(source)
-
-        # time sampling scheme
-        npts = d[0].data.size
-        dt = d[0].stats.delta
-
-        padding_left = int(+time_shift_max/dt)
-        padding_right = int(-time_shift_min/dt)
-        npts_padding = padding_left + padding_right
-
-        # array to hold cross correlations
-        corr = np.zeros(npts_padding+1)
-
-        #
-        # evaluate misfit
-        # 
-
-        corr[:] = 0.
-        for _k in indices:
-            corr += np.correlate(s[_k].data, d[_k].data, 'valid')
-
-        npts_shift = padding_left - corr.argmax()
-        time_shift = npts_shift*dt
-
-        # what start and stop indices will correctly shift synthetics
-        # relative to data?
-        start = padding_left - npts_shift
-        stop = start + npts
-
-        for _k in indices:
-
-            # substract data from shifted synthetics
-            r = s[_k].data[start:stop] - d[_k].data
-
-            # sum the resulting residuals
-            if norm=='L1':
-                residuals += [np.sum(np.abs(r))*dt]
-
-            elif norm=='L2':
-                residuals += [np.sum(r**2)*dt]
-
-
-    return np.mean(residuals)**0.5
 
 
