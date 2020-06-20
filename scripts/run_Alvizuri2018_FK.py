@@ -4,7 +4,7 @@ import numpy as np
 from mtbench import run_grid_search, progress
 from _Alvizuri2018 import fullpath, names, depths, magnitudes,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
-from mtuq.grid import FullMomentTensorGridRegular
+from mtuq.grid import FullMomentTensorGridSemiregular
 
 
 if __name__=='__main__':
@@ -30,7 +30,7 @@ if __name__=='__main__':
             "/home/rmodrak/data/FK/MDJ2",
             )
 
-        grid = FullMomentTensorGridRegular(
+        grid = FullMomentTensorGridSemiregular(
             npts_per_axis=15,
             magnitudes=[magnitude],
             )

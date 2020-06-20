@@ -7,7 +7,7 @@ from copy import deepcopy
 from likelihood_analysis import likelihood_analysis, progress
 from _Silwal2016 import fullpath, names, depths, magnitudes,\
     data_processing_handles_FK, misfit_handles, selected_events, expected_results
-from mtuq.grid import FullMomentTensorGridRegular
+from mtuq.grid import FullMomentTensorGridSemiregular
 
 
 if __name__=='__main__':
@@ -33,7 +33,7 @@ if __name__=='__main__':
             "/store/wf/FK_synthetics/scak",
             )
 
-        grid = FullMomentTensorGridRegular(
+        grid = FullMomentTensorGridSemiregular(
             npts_per_axis=10,
             magnitudes=[magnitude],
             )
