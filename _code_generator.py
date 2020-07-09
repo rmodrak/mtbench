@@ -146,7 +146,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'MODEL',
-            '"ak135f_scak"',
+            '"scak_ak135f"',
             lines)
 
         lines = re.sub(
@@ -156,7 +156,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'PATH_GREENS',
-            '"/home/rmodrak/data/axisem/ak135f_scak-2s"',
+            '"/home/rmodrak/data/axisem/scak_ak135f-2s"',
             lines)
 
         file.write(lines)
@@ -242,7 +242,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'MODEL',
-            '"ak135f_mdj2"',
+            '"mdj2_ak135f_celso"',
             lines)
 
         lines = re.sub(
@@ -252,12 +252,17 @@ if __name__=='__main__':
 
         lines = re.sub(
             'PATH_GREENS',
-            '"/home/rmodrak/data/axisem/ak135f_mdj2-2s"',
+            '"/home/rmodrak/data/axisem/mdj2_ak135f_celso-2s"',
             lines)
 
         lines = re.sub(
-            'DoubleCouple',
-            'FullMomentTensor',
+            'DoubleCoupleGridRegular',
+            'FullMomentTensorGridRandom',
+            lines)
+
+        lines = re.sub(
+            'npts_per_axis=15',
+            'npts=2000000',
             lines)
 
         file.write(lines)
@@ -295,8 +300,13 @@ if __name__=='__main__':
             lines)
 
         lines = re.sub(
-            'DoubleCouple',
-            'FullMomentTensor',
+            'DoubleCoupleGridRegular',
+            'FullMomentTensorGridRandom',
+            lines)
+
+        lines = re.sub(
+            'npts_per_axis=15',
+            'npts=1000000',
             lines)
 
         file.write(lines)
@@ -329,8 +339,13 @@ if __name__=='__main__':
             lines)
 
         lines = re.sub(
-            'DoubleCouple',
-            'FullMomentTensor',
+            'DoubleCoupleGridRegular',
+            'FullMomentTensorGridRandom',
+            lines)
+
+        lines = re.sub(
+            'npts_per_axis=15',
+            'npts=1000000',
             lines)
 
         file.write(lines)
