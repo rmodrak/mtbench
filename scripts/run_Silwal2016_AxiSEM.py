@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import numpy as np
-from mtbench import run_grid_search, progress
+from mtbench import bench, progress
 from _Silwal2016 import fullpath, names, depths, magnitudes,\
-    data_processing_handles, misfit_handles, selected_events, expected_results
+    data_processing, misfit_functions, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
 
 
@@ -21,13 +21,13 @@ if __name__=='__main__':
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "ak135f_scak"
+        model = "scak_ak135f"
         solver = "AxiSEM"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
             fullpath(event_id, 'weights.dat'),
-            "/home/rmodrak/data/axisem/ak135f_scak-2s",
+            "/home/rmodrak/data/axisem/scak_ak135f-2s",
             )
 
         grid = DoubleCoupleGridRegular(
@@ -35,24 +35,19 @@ if __name__=='__main__':
             magnitudes=[magnitude],
             )
 
-        process_bw, process_sw = data_processing_handles(
+        process_data_functions = data_processing(
             path_greens, path_weights,
             )
 
-        misfit_bw, misfit_sw = misfit_handles(
-            )
-
-        run_grid_search(
+        bench(
             event_id,
             path_data,
             path_greens,
             path_weights,
             solver,
             model,
-            process_bw,
-            process_sw,
-            misfit_bw,
-            misfit_sw,
+            process_data_functions,
+            misfit_functions(),
             grid,
             magnitude,
             depth)

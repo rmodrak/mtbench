@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy as np
-from mtbench import run_grid_search, progress
+from mtbench import bench, progress
 from _Alvizuri2018 import fullpath, names, depths, magnitudes,\
-    data_processing_handles, misfit_handles, selected_events, expected_results
-from mtuq.grid import FullMomentTensorGridSemiregular
+    data_processing, misfit_functions, selected_events, expected_results
+from mtuq.grid import FullMomentTensorGridRandom
 
 
 if __name__=='__main__':
@@ -21,38 +21,33 @@ if __name__=='__main__':
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "ak135f_mdj2"
+        model = "mdj2_ak135f_celso"
         solver = "AxiSEM"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
             fullpath(event_id, 'weights.dat'),
-            "/home/rmodrak/data/axisem/ak135f_mdj2-2s",
+            "/home/rmodrak/data/axisem/mdj2_ak135f_celso-2s",
             )
 
-        grid = FullMomentTensorGridSemiregular(
-            npts_per_axis=15,
+        grid = FullMomentTensorGridRandom(
+            npts=2000000,
             magnitudes=[magnitude],
             )
 
-        process_bw, process_sw = data_processing_handles(
+        process_data_functions = data_processing(
             path_greens, path_weights,
             )
 
-        misfit_bw, misfit_sw = misfit_handles(
-            )
-
-        run_grid_search(
+        bench(
             event_id,
             path_data,
             path_greens,
             path_weights,
             solver,
             model,
-            process_bw,
-            process_sw,
-            misfit_bw,
-            misfit_sw,
+            process_data_functions,
+            misfit_functions(),
             grid,
             magnitude,
             depth)

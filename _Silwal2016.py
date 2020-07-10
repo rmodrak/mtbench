@@ -101,7 +101,7 @@ selected_events = [
 expected_results = None
 
 
-def data_processing_handles(
+def data_processing(
         path_greens, path_weights):
 
     process_bw = ProcessData(
@@ -126,10 +126,18 @@ def data_processing_handles(
         capuaf_file=path_weights,
         ) 
 
-    return process_bw, process_sw
+    return (process_bw, process_sw)
 
 
-def data_processing_handles_FK(
+def process_bodywave_rayleigh_love(
+        path_greens, path_weights):
+
+    process_bw, process_sw = data_processing(path_greens, path_weights)
+
+    return process_bw, process_sw, process_sw
+
+
+def data_processing_FK(
         path_greens, path_weights):
 
     process_bw = ProcessData(
@@ -157,7 +165,7 @@ def data_processing_handles_FK(
     return process_bw, process_sw
 
 
-def misfit_handles():
+def misfit_functions():
     misfit_bw = Misfit(
         time_shift_min=-2.,
         time_shift_max=+2.,
@@ -171,6 +179,28 @@ def misfit_handles():
         )
 
     return misfit_bw, misfit_sw
+
+
+def misfit_bodywave_rayleigh_love():
+    misfit_bodywave = Misfit(
+        time_shift_min=-2.,
+        time_shift_max=+2., 
+        time_shift_groups=['ZR'],
+        )
+
+    misfit_rayleigh = Misfit(
+        time_shift_min=-10.,
+        time_shift_max=+10.,
+        time_shift_groups=['ZR'],
+        )
+
+    misfit_love = Misfit(
+        time_shift_min=-10.,
+        time_shift_max=+10.,
+        time_shift_groups=['T'],
+        )
+
+    return misfit_bodywave, misfit_rayleigh, misfit_love
 
 
 def basepath():

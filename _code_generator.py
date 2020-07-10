@@ -1,12 +1,15 @@
-# This scripts generates all the other scripts found in mtbench/scripts
+#!/usr/bin/env python
 
+#
+# This scripts generates the contents of  mtbench/scripts
+#
 
 Imports="""#!/usr/bin/env python
 
 import numpy as np
-from mtbench import run_grid_search, progress
+from mtbench import bench, progress
 from _REFERENCE import fullpath, names, depths, magnitudes,\\
-    data_processing_handles, misfit_handles, selected_events, expected_results
+    data_processing, misfit_functions, selected_events, expected_results
 from mtuq.grid import DoubleCoupleGridRegular
 
 """
@@ -44,24 +47,19 @@ Main="""
             magnitudes=[magnitude],
             )
 
-        process_bw, process_sw = data_processing_handles(
+        process_data_functions = data_processing(
             path_greens, path_weights,
             )
 
-        misfit_bw, misfit_sw = misfit_handles(
-            )
-
-        run_grid_search(
+        bench(
             event_id,
             path_data,
             path_greens,
             path_weights,
             solver,
             model,
-            process_bw,
-            process_sw,
-            misfit_bw,
-            misfit_sw,
+            process_data_functions,
+            misfit_functions(),
             grid,
             magnitude,
             depth)
@@ -69,61 +67,6 @@ Main="""
         _i += 1
 
 """
-
-
-Main2="""
-    for index in selected_events:
-        progress(_i, _n)
-
-        event_id = names[index]
-        depth = depths[index]
-        magnitude = magnitudes[index]
-
-        source = expected_results[index]
-
-        model = MODEL
-        solver = SOLVER
-
-        path_data, path_weights, path_greens = (
-            fullpath(event_id, '*BH.[zrt]'),
-            fullpath(event_id, 'weights.dat'),
-            "/home/rmodrak/data/FK/MDJ2",
-            )
-
-        #from mtbench.Alvizuri2018 import to_mij
-        from mtpar import tt2cmt
-        to_mij = lambda kappa, theta, sigma, M0, gamma, delta : tt2cmt(gamma, delta, M0, kappa, theta, sigma)
-
-        grid = UnstructuredGrid(
-            source.items(),
-            callback=to_mij)
-
-        process_bw, process_sw = data_processing_handles(
-            path_greens, path_weights,
-            )
-
-        misfit_bw, misfit_sw = misfit_handles(
-            )
-
-        grid_search(
-            event_id,
-            path_data,
-            path_greens,
-            path_weights,
-            solver,
-            model,
-            process_bw,
-            process_sw,
-            misfit_bw,
-            misfit_sw,
-            grid,
-            magnitude,
-            depth)
-
-        _i += 1
-
-"""
-
 
 
 if __name__=='__main__':
@@ -189,8 +132,8 @@ if __name__=='__main__':
             lines)
 
         lines = re.sub(
-            'data_processing_handles',
-            'data_processing_handles_FK',
+            'data_processing',
+            'data_processing_FK',
             lines)
 
         file.write(lines)
@@ -295,8 +238,8 @@ if __name__=='__main__':
             lines)
 
         lines = re.sub(
-            'data_processing_handles',
-            'data_processing_handles_FK',
+            'data_processing',
+            'data_processing_FK',
             lines)
 
         lines = re.sub(
@@ -347,46 +290,6 @@ if __name__=='__main__':
             'npts_per_axis=15',
             'npts=1000000',
             lines)
-
-        file.write(lines)
-
-
-    with open('scripts/benchmark_Alvizuri2018.py', 'w') as file:
-        lines = ''
-        lines += Imports
-        lines += Docstring
-        lines += Main2
-
-        lines = re.sub(
-            'REFERENCE',
-            'Alvizuri2018',
-            lines)
-
-        lines = re.sub(
-            'MODEL',
-            '"MDJ2"',
-            lines)
-
-        lines = re.sub(
-            'SOLVER',
-            '"FK"',
-            lines)
-
-        lines = re.sub(
-            'PATH_GREENS',
-            '"/home/rmodrak/data/FK/MDJ2"',
-            lines)
-
-        lines = re.sub(
-            'DoubleCoupleGridRegular',
-            'UnstructuredGrid',
-            lines)
-
-        lines = re.sub(
-            'data_processing_handles',
-            'data_processing_handles_FK',
-            lines)
-
 
         file.write(lines)
 
