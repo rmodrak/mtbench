@@ -8,7 +8,7 @@ from pandas import DataFrame
 from xarray import DataArray
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens, plot_beachball, plot_misfit, plot_misfit_force
+from mtuq.graphics import plot_data_greens
 from mtuq.grid_search import grid_search
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
