@@ -96,7 +96,7 @@ def bench(
     # what index corresponds to minimum misfit?
     results_sum = sum(results)
 
-    idx = results_sum.source_idxmin()
+    idx = results_sum.idxmin('source')
 
     best_source = grid.get(idx)
     source_dict = grid.get_dict(idx)
