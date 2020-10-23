@@ -8,7 +8,7 @@ from pandas import DataFrame
 from xarray import DataArray
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens
+from mtuq.graphics import plot_data_greens, plot_misfit_lune
 from mtuq.grid_search import grid_search
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
@@ -31,6 +31,7 @@ def bench(
     include_mt=True,
     include_force=False,
     estimate_sigma=False,
+    write_data_norm=False,
     plot_waveforms=True,
     verbose=True):
 
@@ -123,6 +124,25 @@ def bench(
             _write(event_id+'_'+str(_i)+'.sigma', sigma)
 
 
+    if write_data_norm:
+
+        for _i, misfit in enumerate(misfit_functions):
+
+            groups = misfit.time_shift_groups
+            if len(groups) > 1:
+               print('Too many time shift groups. Skipping...')
+               continue
+
+            components = []
+            for component in groups[0]:
+               components += [component]
+
+            data_norm = _calculate_data_norm(processed_data[_i], misfit.norm, components)
+
+            _write(event_id+'_'+str(_i)+'.data_norm', data_norm)
+
+
+
     #
     # Saving results
     #
@@ -139,6 +159,11 @@ def bench(
             misfit_functions[0], misfit_functions[1], 
             stations, origin, best_source, source_dict)
 
+    try:
+        plot_misfit_lune(event_id+'_misfit_sum.png', results[1])
+    except:
+        pass
+
 
     for _i, ds in enumerate(results):
         task(_i, nn)
@@ -152,6 +177,36 @@ def bench(
 #
 # variance estimation
 #
+
+
+def _calculate_data_norm(data, norm, components):
+    # error checking
+    assert norm in ('L1', 'L2')
+
+    data_norm = 0.
+    for _j, d in enumerate(data):
+        _components, indices = list_intersect_with_indices(
+            components, get_components(d))
+
+        if not indices:
+            continue
+
+        # time sampling scheme
+        npts = d[0].data.size
+        dt = d[0].stats.delta
+
+        for _k in indices:
+            r = d[_k].data
+
+            if norm=='L1':
+                data_norm += np.sum(np.abs(r))*dt
+
+            elif norm=='L2':
+                data_norm += np.sum(r**2)*dt
+
+    return data_norm
+
+
 
 def _estimate_sigma(data, greens, best_source, norm, components,
     time_shift_min, time_shift_max):
