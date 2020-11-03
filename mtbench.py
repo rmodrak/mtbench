@@ -10,6 +10,7 @@ from xarray import DataArray
 from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens, plot_misfit_lune
 from mtuq.grid_search import grid_search
+from mtuq.misfit import Misfit
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
 from mtuq.util.signal import get_components
@@ -23,28 +24,52 @@ def bench(
     path_weights,
     solver,
     model,
-    process_data_functions,
-    misfit_functions,
     grid,
     magnitude,
     depth,
+    process_bw,
+    process_sw,
+    minmax_bw=[-2., +2.],
+    minmax_sw=[-5., +5.],
+    include_bw=False,
+    include_rayleigh=True,
+    include_love=True,
     include_mt=True,
     include_force=False,
-    estimate_sigma=False,
-    write_data_norm=False,
+    write_sigma=False,
+    write_norm_data=False,
     plot_waveforms=True,
     verbose=True):
 
-    nn = len(process_data_functions)
+    """ Carries out a separate grid search for each chosen data type and
+    peforms simple statistical analyses
+    """
 
-    if len(process_data_functions)!=len(misfit_functions):
-        raise Exception()
+    data_processing = []
+    if include_bw:
+        data_processing += [process_bw]
+    if include_rayleigh:
+        data_processing += [process_sw]
+    if include_love:
+        data_processing += [process_sw]
+
+    misfit_functions = []
+    if include_bw:
+        misfit_functions += [_get_misfit_bw(minmax_bw)]
+    if include_rayleigh:
+        misfit_functions += [_get_misfit_rayleigh(minmax_sw)]
+    if include_love:
+        misfit_functions += [_get_misfit_love(minmax_sw)]
 
 
     if verbose:
         print('event:   %s' % event_id)
         print('data:    %s' % path_data)
         print('weights: %s\n' % path_weights)
+
+    ntasks = int(include_bw)+\
+             int(include_rayleigh)+\
+             int(include_love)
 
 
     #
@@ -65,7 +90,7 @@ def bench(
     origin.depth_in_m = depth
 
     processed_data = []
-    for process_data in process_data_functions:
+    for process_data in data_processing:
         processed_data += [data.map(process_data)]
 
 
@@ -79,7 +104,7 @@ def bench(
     greens.convolve(Trapezoid(magnitude=magnitude))
 
     processed_greens = []
-    for process_data in process_data_functions:
+    for process_data in data_processing:
         processed_greens += [greens.map(process_data)]
 
 
@@ -91,8 +116,9 @@ def bench(
 
     results = []
     for _i, misfit in enumerate(misfit_functions):
-        task(_i, nn)
-        results += [grid_search(processed_data[_i], processed_greens[_i], misfit, origin, grid)]
+        task(_i, ntasks)
+        results += [grid_search(processed_data[_i], processed_greens[_i], 
+                                misfit, origin, grid)]
 
     # what index corresponds to minimum misfit?
     results_sum = sum(results)
@@ -103,8 +129,8 @@ def bench(
     source_dict = grid.get_dict(idx)
 
 
-    if estimate_sigma:
-        print('  estimating data variance...\n')
+    if write_sigma:
+        print('  estimating variance...\n')
 
         for _i, misfit in enumerate(misfit_functions):
 
@@ -117,14 +143,15 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            sigma = _estimate_sigma(processed_data[_i], processed_greens[_i],
+            sigma = calculate_sigma(processed_data[_i], processed_greens[_i],
                 best_source, misfit.norm, components,
                 misfit.time_shift_min, misfit.time_shift_max)
 
             _write(event_id+'_'+str(_i)+'.sigma', sigma)
 
 
-    if write_data_norm:
+    if write_norm_data:
+        print('  calculating data norm...\n')
 
         for _i, misfit in enumerate(misfit_functions):
 
@@ -137,9 +164,9 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            data_norm = _calculate_data_norm(processed_data[_i], misfit.norm, components)
+            norm_data = calculate_norm_data(processed_data[_i], misfit.norm, components)
 
-            _write(event_id+'_'+str(_i)+'.data_norm', data_norm)
+            _write(event_id+'_'+str(_i)+'.norm_data', norm_data)
 
 
 
@@ -152,21 +179,22 @@ def bench(
     if plot_waveforms:
         print('  plotting waveforms...\n')
 
-        plot_data_greens(event_id+'.png', 
-            processed_data[0], processed_data[1], 
-            processed_greens[0], processed_greens[1], 
-            process_data_functions[0], process_data_functions[1], 
-            misfit_functions[0], misfit_functions[1], 
-            stations, origin, best_source, source_dict)
-
-    try:
-        plot_misfit_lune(event_id+'_misfit_sum.png', results[1])
-    except:
-        pass
-
+        _plot_waveforms(event_id+'_waveforms.png', 
+            processed_data,
+            processed_greens,
+            include_bw,
+            bool(include_rayleigh or include_love),
+            process_bw,
+            process_sw,
+            minmax_bw,
+            minmax_sw,
+            stations,
+            origin,
+            best_source,
+            source_dict)
 
     for _i, ds in enumerate(results):
-        task(_i, nn)
+        task(_i, ntasks)
         _save(event_id+'_'+str(_i), ds)
 
 
@@ -174,16 +202,11 @@ def bench(
 
 
 
-#
-# variance estimation
-#
-
-
-def _calculate_data_norm(data, norm, components):
+def calculate_norm_data(data, norm, components):
     # error checking
     assert norm in ('L1', 'L2')
 
-    data_norm = 0.
+    norm_data = 0.
     for _j, d in enumerate(data):
         _components, indices = list_intersect_with_indices(
             components, get_components(d))
@@ -199,19 +222,17 @@ def _calculate_data_norm(data, norm, components):
             r = d[_k].data
 
             if norm=='L1':
-                data_norm += np.sum(np.abs(r))*dt
+                norm_data += np.sum(np.abs(r))*dt
 
             elif norm=='L2':
-                data_norm += np.sum(r**2)*dt
+                norm_data += np.sum(r**2)*dt
 
-    return data_norm
+    return norm_data
 
 
 
-def _estimate_sigma(data, greens, best_source, norm, components,
+def calculate_sigma(data, greens, best_source, norm, components,
     time_shift_min, time_shift_max):
-    """ A posteriori standard deviation estimate
-    """
 
     # error checking
     assert norm in ('L1', 'L2')
@@ -271,6 +292,42 @@ def _estimate_sigma(data, greens, best_source, norm, components,
     return np.mean(residuals)**0.5
 
 
+def _plot_waveforms(filename,
+    data,
+    greens,
+    include_bw,
+    include_sw,
+    process_bw,
+    process_sw,
+    minmax_bw,
+    minmax_sw,
+    stations,
+    origin,
+    best_source,
+    source_dict):
+
+    if include_bw and include_sw:
+        plot_data_greens(filename,
+            [data[0], data[1]], 
+            [greens[0], greens[1]],
+            [process_bw, process_sw], 
+            [_get_misfit_bw(minmax_bw), _get_misfit_sw(minmax_sw)],
+            stations, 
+            origin, 
+            best_source,
+            source_dict)
+
+    elif include_sw:
+        plot_data_greens(filename,
+            data[0],
+            greens[0],
+            process_sw,
+            _get_misfit_sw(minmax_sw),
+            stations, 
+            origin, 
+            best_source,
+            source_dict)
+
 
 #
 # utility functions
@@ -297,12 +354,35 @@ def task(_i, _n):
         print('  task %d of %d' % (_i+1, _n))
 
 
-def _override(misfit_functions):
-    # overrides whatever norms are specified 
-    # (because estimates_sigma only allows L2 norm)
-    for misfit in misfit_functions:
-        if misfit.norm!='L2':
-            warnings.warn('Forcing L2 norm')
-            misfit.norm='L2'
-    return misfit_functions
+def _get_misfit_rayleigh(minmax):
+    return Misfit(
+        norm='L2',
+        time_shift_min=minmax[0],
+        time_shift_max=minmax[1],
+        time_shift_groups=['ZR'],
+        )
+
+def _get_misfit_love(minmax):
+    return Misfit(
+        norm='L2',
+        time_shift_min=minmax[0],
+        time_shift_max=minmax[1],
+        time_shift_groups=['T'],
+        )
+
+def _get_misfit_bw(minmax):
+    return Misfit(
+        norm='L2',
+        time_shift_min=minmax[0],
+        time_shift_max=minmax[1],
+        time_shift_groups=['ZR'],
+        )
+
+def _get_misfit_sw(minmax):
+    return Misfit(
+        norm='L2',
+        time_shift_min=minmax[0],
+        time_shift_max=minmax[1],
+        time_shift_groups=['ZR','T'],
+        )
 
