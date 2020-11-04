@@ -70,15 +70,15 @@ magnitudes_Fig2_caption = [
 
 
 selected_events = [
-    0,    
-  ##1, 
-    2,
-    3,
-  ##4,
-    5,
-  ##6,
-  ##7,
-  ##8,
+  #0,    
+  #1, 
+   2,
+   3,
+   4,
+   5,
+   6,
+  #7,
+  #8,
     ]
 
 
@@ -171,14 +171,6 @@ def data_processing(
     return process_bw, process_sw
 
 
-def process_rayleigh_love(
-        path_greens, path_weights):
-
-    _, process_sw = data_processing(path_greens, path_weights)
-
-    return process_sw, process_sw
-
-
 def data_processing_FK(
         path_greens, path_weights):
 
@@ -222,23 +214,6 @@ def misfit_functions():
         )
 
     return misfit_bw, misfit_sw
-
-
-def misfit_rayleigh_love():
-
-    misfit_rayleigh = Misfit(
-        time_shift_min=-5.,
-        time_shift_max=+5.,
-        time_shift_groups=['ZR'],
-        )
-
-    misfit_love = Misfit(
-        time_shift_min=-5.,
-        time_shift_max=+5.,
-        time_shift_groups=['T'],
-        )
-
-    return misfit_rayleigh, misfit_love
 
 
 def basepath():

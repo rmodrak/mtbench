@@ -47,7 +47,7 @@ Main="""
             magnitudes=[magnitude],
             )
 
-        process_data_functions = data_processing(
+        process_bw, process_sw = data_processing(
             path_greens, path_weights,
             )
 
@@ -58,11 +58,18 @@ Main="""
             path_weights,
             solver,
             model,
-            process_data_functions,
-            misfit_functions(),
             grid,
             magnitude,
-            depth)
+            depth,
+            process_bw,
+            process_sw,
+            include_bw=False,
+            include_rayleigh=True,
+            include_love=True,
+            include_mt=True,
+            include_force=False,
+            plot_waveforms=True,
+            )
 
         _i += 1
 
@@ -102,6 +109,11 @@ if __name__=='__main__':
             '"/home/rmodrak/data/axisem/scak_ak135f-2s"',
             lines)
 
+        lines = re.sub(
+            'include_bw=False',
+            'include_bw=True',
+            lines)
+
         file.write(lines)
 
 
@@ -136,6 +148,11 @@ if __name__=='__main__':
             'data_processing_FK',
             lines)
 
+        lines = re.sub(
+            'include_bw=False',
+            'include_bw=True',
+            lines)
+
         file.write(lines)
 
 
@@ -163,6 +180,11 @@ if __name__=='__main__':
         lines = re.sub(
             'PATH_GREENS',
             '"http://service.iris.edu/irisws/syngine/1"',
+            lines)
+
+        lines = re.sub(
+            'include_bw=False',
+            'include_bw=True',
             lines)
 
         file.write(lines)

@@ -11,4 +11,9 @@ gmt.history
 *.ps
 
 input/
+output/
+
+*.h5
+*.nc
+
 

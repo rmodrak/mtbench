@@ -35,7 +35,7 @@ if __name__=='__main__':
             magnitudes=[magnitude],
             )
 
-        process_data_functions = data_processing(
+        process_bw, process_sw = data_processing(
             path_greens, path_weights,
             )
 
@@ -46,11 +46,18 @@ if __name__=='__main__':
             path_weights,
             solver,
             model,
-            process_data_functions,
-            misfit_functions(),
             grid,
             magnitude,
-            depth)
+            depth,
+            process_bw,
+            process_sw,
+            include_bw=True,
+            include_rayleigh=True,
+            include_love=True,
+            include_mt=True,
+            include_force=False,
+            plot_waveforms=True,
+            )
 
         _i += 1
 
