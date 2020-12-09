@@ -209,7 +209,7 @@ def calculate_norm_data(data, norm, components):
     norm_data = 0.
     for _j, d in enumerate(data):
         _components, indices = list_intersect_with_indices(
-            components, get_components(d))
+            get_components(d), components)
 
         if not indices:
             continue
