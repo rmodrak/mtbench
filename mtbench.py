@@ -8,7 +8,7 @@ from pandas import DataFrame
 from xarray import DataArray
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens, plot_misfit_lune
+from mtuq.graphics import plot_data_greens1, plot_data_greens2, plot_misfit_lune
 from mtuq.grid_search import grid_search
 from mtuq.misfit import Misfit
 from mtuq.util.cap import parse_station_codes, Trapezoid
@@ -307,18 +307,18 @@ def _plot_waveforms(filename,
     source_dict):
 
     if include_bw and include_sw:
-        plot_data_greens(filename,
-            [data[0], data[1]], 
-            [greens[0], greens[1]],
-            [process_bw, process_sw], 
-            [_get_misfit_bw(minmax_bw), _get_misfit_sw(minmax_sw)],
+        plot_data_greens2(filename,
+            data[0], data[1], 
+            greens[0], greens[1],
+            process_bw, process_sw, 
+            _get_misfit_bw(minmax_bw), _get_misfit_sw(minmax_sw),
             stations, 
             origin, 
             best_source,
             source_dict)
 
     elif include_sw:
-        plot_data_greens(filename,
+        plot_data_greens1(filename,
             data[0],
             greens[0],
             process_sw,
