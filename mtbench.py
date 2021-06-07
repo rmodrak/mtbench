@@ -4,12 +4,9 @@ import os
 import numpy as np
 import warnings
 
-from pandas import DataFrame
-from xarray import DataArray
-
 from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens1, plot_data_greens2, plot_misfit_lune
-from mtuq.grid_search import grid_search
+from mtuq.grid_search import DataArray, DataFrame, grid_search
 from mtuq.misfit import Misfit
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
