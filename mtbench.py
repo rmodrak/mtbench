@@ -246,7 +246,7 @@ def calculate_sigma(data, greens, best_source, norm, components,
             continue
 
         # generate synthetics
-        greens[_j]._set_components(_components)
+        greens[_j]._set_components(get_components(d))
         s = greens[_j].get_synthetics(best_source)
 
         # time sampling scheme
