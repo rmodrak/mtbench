@@ -83,11 +83,9 @@ def bench(
 
     data.sort_by_distance()
     stations = data.get_stations()
-    for station in stations: print(station, '\n') # DEBUG
 
     origin = data.get_origins()[0]
     origin.depth_in_m = depth
-    print(origin)
 
     processed_data = []
     for process_data in data_processing:
@@ -124,7 +122,7 @@ def bench(
     # what index corresponds to minimum misfit?
     results_sum = sum(results)
 
-    idx = results_sum.idxmin('source')
+    idx = results_sum.source_idxmin()
 
     best_source = grid.get(idx)
     source_dict = grid.get_dict(idx)
