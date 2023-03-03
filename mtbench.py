@@ -40,7 +40,7 @@ def bench(
     verbose=True):
 
     """ Carries out a separate grid search for each chosen data type and
-    peforms simple statistical analyses
+    performs simple statistical analyses
     """
 
     data_processing = []

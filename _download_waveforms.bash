@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# navigate to mtbench/setup
+# navigate to mtbench root directory
 cd $(dirname ${BASH_SOURCE[0]})
 
 
