@@ -2,16 +2,16 @@
 
 import numpy as np
 from mtbench import bench, progress
-from _Silwal2016 import fullpath, names, depths, magnitudes,\
+from _Alvizuri2018 import fullpath, names, depths, magnitudes,\
     data_processing, misfit_functions, selected_events, expected_results
-from mtuq.grid import DoubleCoupleGridRegular
+from mtuq.grid import FullMomentTensorGridRandom
 
 
 if __name__=='__main__':
     _i, _n = 1, len(selected_events)
 
     #
-    # loop over selected events from Silwal2016
+    # loop over selected events from Alvizuri2018
     #
 
     for index in selected_events:
@@ -21,23 +21,27 @@ if __name__=='__main__':
         depth = depths[index]
         magnitude = magnitudes[index]
 
-        model = "scak_ak135f"
-        solver = "AxiSEM"
+        #model = "1D_ak135f_no_mud"
+        model = "s40rts_crust1.0"
+
+        solver = "SPECFEM3D"
 
         path_data, path_weights, path_greens = ( 
             fullpath(event_id, '*BH.[zrt]'), 
-            fullpath(event_id, 'weights.dat'),
-            "/home/rmodrak/data/axisem/scak_ak135f-2s",
+            fullpath(event_id, 'weight_celso.dat'),
+            "/Users/rmodrak/Downloads/greens/output/NKT/"+model,
             )
 
-        grid = DoubleCoupleGridRegular(
-            npts_per_axis=40,
-            magnitudes=[magnitude],
+        grid = FullMomentTensorGridRandom(
+            npts=500000,
+            magnitudes=np.linspace(magnitude-1, magnitude+1, 5),
             )
 
         process_bw, process_sw = data_processing(
             path_greens, path_weights,
             )
+
+        print(process_sw.__dict__)
 
         bench(
             event_id,
@@ -51,7 +55,7 @@ if __name__=='__main__':
             depth,
             process_bw,
             process_sw,
-            include_bw=True,
+            include_bw=False,
             include_rayleigh=True,
             include_love=True,
             include_mt=True,

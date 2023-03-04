@@ -31,7 +31,7 @@ if __name__=='__main__':
             )
 
         grid = FullMomentTensorGridRandom(
-            npts=1000000,
+            npts_per_axis=40,
             magnitudes=[magnitude],
             )
 

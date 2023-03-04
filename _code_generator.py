@@ -43,7 +43,7 @@ Main="""
             )
 
         grid = DoubleCoupleGridRegular(
-            npts_per_axis=15,
+            npts_per_axis=40,
             magnitudes=[magnitude],
             )
 
