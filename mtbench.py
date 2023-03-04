@@ -38,8 +38,8 @@ def bench(
     include_love=True,
     include_mt=True,
     include_force=False,
-    write_sigma=False,
-    write_norm_data=False,
+    calculate_sigma=False,
+    calculate_norm_data=False,
     save_misfit=False,
     plot_waveforms=True,
     lune_misfit=False,
@@ -57,6 +57,26 @@ def bench(
     """ Carries out a separate grid search for each chosen data type and
     performs simple statistical analyses
     """
+
+    #
+    # parameter checking
+    #
+    if any((
+        lune_likelihood,
+        lune_marginal,
+        vw_likelihood,
+        vw_marginal,
+        dc_likelihood,
+        dc_marginal,
+        )):
+        assert calculate_sigma, "calculate_sigma=True required"
+
+
+    if any((
+        lune_variance_reduction,
+        )):
+        assert calculate_norm_data, "calculate_norm_data=True required"
+
 
     data_processing = []
     if include_bw:
@@ -143,9 +163,10 @@ def bench(
     source_dict = grid.get_dict(idx)
 
 
-    if write_sigma:
+    if calculate_sigma:
         print('  estimating variance...\n')
 
+        sigma = []
         for _i, misfit in enumerate(misfit_functions):
 
             groups = misfit.time_shift_groups
@@ -157,16 +178,17 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            sigma = estimate_sigma(processed_data[_i], processed_greens[_i],
+            sigma += [estimate_sigma(processed_data[_i], processed_greens[_i],
                 best_source, misfit.norm, components,
-                misfit.time_shift_min, misfit.time_shift_max)
+                misfit.time_shift_min, misfit.time_shift_max)]
 
-            _write(event_id+'_'+str(_i)+'.sigma', sigma)
+            _write(event_id+'_'+str(_i)+'.sigma', sigma[-1])
 
 
-    if write_norm_data:
+    if calculate_norm_data:
         print('  calculating data norm...\n')
 
+        norm_data = []
         for _i, misfit in enumerate(misfit_functions):
 
             groups = misfit.time_shift_groups
@@ -178,9 +200,9 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            norm_data = calculate_norm_data(processed_data[_i], misfit.norm, components)
+            norm_data += [calculate_norm_data(processed_data[_i], misfit.norm, components)]
 
-            _write(event_id+'_'+str(_i)+'.norm_data', norm_data)
+            _write(event_id+'_'+str(_i)+'.norm_data', norm_data[-1])
 
 
     #
