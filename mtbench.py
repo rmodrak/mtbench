@@ -37,6 +37,16 @@ def bench(
     write_sigma=False,
     write_norm_data=False,
     plot_waveforms=True,
+    lune_misfit=False,
+    lune_likelihood=False,
+    lune_marginal=False,
+    lune_variance_reduction=False,
+    vw_misfit=False,
+    vw_likelihood=False,
+    vw_marginal=False,
+    dc_misfit=False,
+    dc_likelihood=False,
+    dc_marginal=False,
     verbose=True):
 
     """ Carries out a separate grid search for each chosen data type and
@@ -166,6 +176,43 @@ def bench(
             norm_data = calculate_norm_data(processed_data[_i], misfit.norm, components)
 
             _write(event_id+'_'+str(_i)+'.norm_data', norm_data)
+
+
+    #
+    # Generating figures
+    #
+
+    if lune_misfit:
+        pass
+
+    if lune_likelihood:
+        pass
+
+    if lune_marginal:
+        pass
+
+    if lune_variance_reduction:
+        pass
+
+
+    if vw_misfit:
+        pass
+
+    if vw_likelihood:
+        pass
+
+    if vw_marginal:
+        pass
+
+
+    if dc_misfit:
+        pass
+
+    if dc_likelihood:
+        pass
+
+    if dc_marginal:
+        pass
 
 
 
