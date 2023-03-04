@@ -5,7 +5,11 @@ import numpy as np
 import warnings
 
 from mtuq import read, open_db, download_greens_tensors
-from mtuq.graphics import plot_data_greens1, plot_data_greens2, plot_misfit_lune
+from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
+    plot_misfit_lune, plot_likelihood_lune, plot_marginal_lune,\
+    plot_misfit_vw, plot_likelihood_vw, plot_marginal_vw,\
+    plot_misfit_dc, plot_likelihood_dc, plot_marginal_dc,\
+    plot_variance_reduction_lune, plot_time_shifts, plot_amplitude_ratios
 from mtuq.grid_search import DataArray, DataFrame, grid_search
 from mtuq.misfit import Misfit
 from mtuq.misfit.waveform._stats import estimate_sigma, calculate_norm_data
@@ -36,6 +40,7 @@ def bench(
     include_force=False,
     write_sigma=False,
     write_norm_data=False,
+    save_misfit=False,
     plot_waveforms=True,
     lune_misfit=False,
     lune_likelihood=False,
@@ -181,6 +186,24 @@ def bench(
     #
     # Generating figures
     #
+    print('Generating figures...\n')
+
+    if plot_waveforms:
+        print('  plotting waveforms...\n')
+
+        _plot_waveforms(event_id+'_waveforms.png',
+            processed_data,
+            processed_greens,
+            include_bw,
+            bool(include_rayleigh or include_love),
+            process_bw,
+            process_sw,
+            minmax_bw,
+            minmax_sw,
+            stations,
+            origin,
+            best_source,
+            source_dict)
 
     if lune_misfit:
         pass
@@ -220,28 +243,12 @@ def bench(
     # Saving results
     #
 
-    print('Saving results...\n')
+    if save_misfit:
+        print('Saving results...\n')
 
-    if plot_waveforms:
-        print('  plotting waveforms...\n')
-
-        _plot_waveforms(event_id+'_waveforms.png', 
-            processed_data,
-            processed_greens,
-            include_bw,
-            bool(include_rayleigh or include_love),
-            process_bw,
-            process_sw,
-            minmax_bw,
-            minmax_sw,
-            stations,
-            origin,
-            best_source,
-            source_dict)
-
-    for _i, ds in enumerate(results):
-        task(_i, ntasks)
-        _save(event_id+'_'+str(_i), ds)
+        for _i, ds in enumerate(results):
+            task(_i, ntasks)
+            _save(event_id+'_'+str(_i), ds)
 
 
     print('\nFinished\n')
