@@ -4,7 +4,7 @@ import numpy as np
 from mtbench import bench, progress
 from _Alvizuri2018 import fullpath, names, depths, magnitudes,\
     data_processing, misfit_functions, selected_events, expected_results
-from mtuq.grid import FullMomentTensorGridRandom
+from mtuq.grid import FullMomentTensorGridSemiregular
 
 
 if __name__=='__main__':
@@ -30,8 +30,8 @@ if __name__=='__main__':
             "/home/rmodrak/data/axisem/mdj2_ak135f_celso-2s",
             )
 
-        grid = FullMomentTensorGridRandom(
-            npts_per_axis=40,
+        grid = FullMomentTensorGridSemiregular(
+            npts_per_axis=10,
             magnitudes=[magnitude],
             )
 
@@ -57,6 +57,7 @@ if __name__=='__main__':
             include_mt=True,
             include_force=False,
             plot_waveforms=True,
+            lune_misfit=True,
             )
 
         _i += 1

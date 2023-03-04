@@ -57,6 +57,7 @@ if __name__=='__main__':
             include_mt=True,
             include_force=False,
             plot_waveforms=True,
+            dc_misfit=True,
             )
 
         _i += 1

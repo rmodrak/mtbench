@@ -69,6 +69,7 @@ Main="""
             include_mt=True,
             include_force=False,
             plot_waveforms=True,
+            dc_misfit=True,
             )
 
         _i += 1
@@ -222,12 +223,17 @@ if __name__=='__main__':
 
         lines = re.sub(
             'DoubleCoupleGridRegular',
-            'FullMomentTensorGridRandom',
+            'FullMomentTensorGridSemiregular',
             lines)
 
         lines = re.sub(
-            'npts_per_axis=15',
-            'npts=2000000',
+            'npts_per_axis=.*',
+            'npts_per_axis=10,',
+            lines)
+
+        lines = re.sub(
+            'dc_misfit',
+            'lune_misfit',
             lines)
 
         file.write(lines)
@@ -266,12 +272,17 @@ if __name__=='__main__':
 
         lines = re.sub(
             'DoubleCoupleGridRegular',
-            'FullMomentTensorGridRandom',
+            'FullMomentTensorGridSemiregular',
             lines)
 
         lines = re.sub(
-            'npts_per_axis=15',
-            'npts=1000000',
+            'npts_per_axis=.*',
+            'npts_per_axis=10,',
+            lines)
+
+        lines = re.sub(
+            'dc_misfit',
+            'lune_misfit',
             lines)
 
         file.write(lines)
@@ -305,12 +316,17 @@ if __name__=='__main__':
 
         lines = re.sub(
             'DoubleCoupleGridRegular',
-            'FullMomentTensorGridRandom',
+            'FullMomentTensorGridSemiregular',
             lines)
 
         lines = re.sub(
-            'npts_per_axis=15',
-            'npts=1000000',
+            'npts_per_axis=.*',
+            'npts_per_axis=10,',
+            lines)
+
+        lines = re.sub(
+            'dc_misfit',
+            'lune_misfit',
             lines)
 
         file.write(lines)
