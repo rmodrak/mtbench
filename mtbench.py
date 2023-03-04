@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#e!/usr/bin/env python
 
 import os
 import numpy as np
 import warnings
+from os.path import join
 
 from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
@@ -69,13 +70,13 @@ def bench(
         dc_likelihood,
         dc_marginal,
         )):
-        assert calculate_sigma, "calculate_sigma=True required"
+        calculate_sigma = True
 
 
     if any((
         lune_variance_reduction,
         )):
-        assert calculate_norm_data, "calculate_norm_data=True required"
+        calculate_norm_data = True
 
 
     data_processing = []
@@ -166,7 +167,9 @@ def bench(
     if calculate_sigma:
         print('  estimating variance...\n')
 
-        sigma = []
+        devs = []
+        vars = []
+
         for _i, misfit in enumerate(misfit_functions):
 
             groups = misfit.time_shift_groups
@@ -178,11 +181,13 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            sigma += [estimate_sigma(processed_data[_i], processed_greens[_i],
+            devs += [estimate_sigma(processed_data[_i], processed_greens[_i],
                 best_source, misfit.norm, components,
                 misfit.time_shift_min, misfit.time_shift_max)]
 
-            _write(event_id+'_'+str(_i)+'.sigma', sigma[-1])
+            vars += [devs[-1]**2]
+
+            _write(event_id+'_'+str(_i)+'.sigma', devs[-1])
 
 
     if calculate_norm_data:
@@ -227,37 +232,47 @@ def bench(
             best_source,
             source_dict)
 
+
     if lune_misfit:
-        pass
+        print('  plotting misfit...')
+        _map(event_id+'_misfit_lune', plot_misfit_lune, results)
 
     if lune_likelihood:
-        pass
+        print('  plotting maximum likelihoods...')
+        _map(event_id+'_likelihood_lune', plot_likelihood_lune, results, vars)
 
     if lune_marginal:
-        pass
+        print('  plotting marginal likelihoods...')
+        _map(event_id+'_marginal_lune', plot_marginal_lune, results, vars)
 
     if lune_variance_reduction:
         pass
 
 
     if vw_misfit:
-        pass
+        print('  plotting misfit...')
+        _map(event_id+'_misfit_vw', plot_misfit_vw, results)
 
     if vw_likelihood:
-        pass
+        print('  plotting maximum likelihoods...')
+        _map(event_id+'_likelihood_vw', plot_likelihood_vw, results, vars)
 
     if vw_marginal:
-        pass
+        print('  plotting marginal likelihoods...')
+        _map(event_id+'_marginal_vw', plot_marginal_vw, results, vars)
 
 
     if dc_misfit:
-        pass
+        print('  plotting misfit...')
+        _map(event_id+'_misfit_dc', plot_misfit_dc, results)
 
     if dc_likelihood:
-        pass
+        print('  plotting maximum likelihoods...')
+        _map(event_id+'_likelihood_dc', plot_likelihood_dc, results, vars)
 
     if dc_marginal:
-        pass
+        print('  plotting maximum likelihoods...')
+        _map(event_id+'_marginal_dc', plot_marginal_dc, results, vars)
 
 
 
@@ -275,6 +290,24 @@ def bench(
 
     print('\nFinished\n')
 
+
+
+#
+# graphics
+#
+
+def _map(dirname, func, *sequences, **kwargs):
+    """ Used to map plotting function onto a sequence of misfit or likelihood
+    surfaces
+    """
+
+    os.makedirs(dirname, exist_ok=True)
+
+    for _i, arg_list in enumerate(zip(*sequences)):
+        filename = join(dirname, '%d.png' % _i)
+
+        # call plotting function
+        func(filename, *arg_list, **kwargs)
 
 
 def _plot_waveforms(filename,
