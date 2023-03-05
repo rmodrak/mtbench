@@ -1,0 +1,52 @@
+
+Instructions
+------------
+
+1. Install mtuq within a conda virtual environment following these instructions
+
+    https://uafgeotools.github.io/mtuq/install/index.html
+
+
+2  Within the same virtual environment install mtbench
+
+   >> cd mtbench
+   >> pip install -e .
+
+
+3. Download waveform data
+
+  >> bash WAVEFORMS/download.bash
+
+
+4. Run scripts
+
+  >> cd scripts/
+  >> python run_Silwal2016_syngine
+  >> python run_Alvizuri2018_syngine
+
+
+5. Optionally, compare your results with the expected output
+
+  >> bash FIGURES/download.bash
+
+
+
+Notes
+-----
+
+ - AxiSEM and FK scripts closely reproduce published figures, but require local Green's function databases (avilable at University of Alaska Fairbanks)
+
+ - syngine scripts do NOT closely reproduce published figures since AK135F is used in place of regional velocity models
+
+- syngine scripts download Green's functions from a remote server, which take a long time. After the initial downloads, Green's function are locally cached, so any subsequent runs will be much faster.
+
+
+
+References
+----------
+
+[`Alvizuri2018`] C. Alvizuri and C. Tape (2018), Full Moment Tensor Analysis of Nuclear Explosions in North Korea, SRL, https://doi.org/10.1785/0220180158
+ 
+
+[`Silwal2016`] V. Silwal and C. Tape (2016), Seismic moment tensors and estimated uncertainties in southern Alaska, JGR, https://doi.org/10.1002/2015JB012588
+
