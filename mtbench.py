@@ -10,14 +10,19 @@ from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
     plot_misfit_lune, plot_likelihood_lune, plot_marginal_lune,\
     plot_misfit_vw, plot_likelihood_vw, plot_marginal_vw,\
     plot_misfit_dc, plot_likelihood_dc, plot_marginal_dc,\
-    plot_variance_reduction_lune, plot_time_shifts, plot_amplitude_ratios
-from mtuq.graphics import plot_beachball as _plot_beachball
+    plot_variance_reduction_lune, plot_time_shifts, plot_amplitude_ratios,\
+    plot_beachball
 from mtuq.grid_search import DataArray, DataFrame, grid_search
 from mtuq.misfit import Misfit
 from mtuq.misfit.waveform._stats import estimate_sigma, calculate_norm_data
 from mtuq.util.cap import parse_station_codes, Trapezoid
 from mtuq.util.math import list_intersect_with_indices
 from mtuq.util.signal import get_components
+
+
+# workaround name conflicts
+_plot_beachball = plot_beachball
+_calculate_norm_data = calculate_norm_data
 
 
 
@@ -202,7 +207,7 @@ def bench(
     if calculate_norm_data:
         print('  calculating data norm...\n')
 
-        norm_data = []
+        norms = []
         for _i, misfit in enumerate(misfit_functions):
 
             groups = misfit.time_shift_groups
@@ -214,9 +219,9 @@ def bench(
             for component in groups[0]:
                components += [component]
 
-            norm_data += [calculate_norm_data(processed_data[_i], misfit.norm, components)]
+            norms += [_calculate_norm_data(processed_data[_i], misfit.norm, components)]
 
-            _write(event_id+'_'+str(_i)+'.norm_data', norm_data[-1])
+            _write(event_id+'_'+str(_i)+'.norm_data', norms[-1])
 
 
     #
@@ -260,7 +265,8 @@ def bench(
         _map(event_id+'_marginal_lune', labels, plot_marginal_lune, results, vars)
 
     if lune_variance_reduction:
-        pass
+        print('  plotting variance reduction...')
+        _map(event_id+'_variance_reduction', labels, plot_variance_reduction_lune, results, norms)
 
 
     if vw_misfit:

@@ -68,6 +68,7 @@ Main="""
             include_love=True,
             include_mt=True,
             include_force=False,
+            plot_beachball=True,
             plot_waveforms=True,
             dc_misfit=True,
             )
