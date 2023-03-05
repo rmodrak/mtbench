@@ -11,6 +11,7 @@ from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
     plot_misfit_vw, plot_likelihood_vw, plot_marginal_vw,\
     plot_misfit_dc, plot_likelihood_dc, plot_marginal_dc,\
     plot_variance_reduction_lune, plot_time_shifts, plot_amplitude_ratios
+from mtuq.graphics import plot_beachball as _plot_beachball
 from mtuq.grid_search import DataArray, DataFrame, grid_search
 from mtuq.misfit import Misfit
 from mtuq.misfit.waveform._stats import estimate_sigma, calculate_norm_data
@@ -42,6 +43,7 @@ def bench(
     calculate_sigma=False,
     calculate_norm_data=False,
     save_misfit=False,
+    plot_beachball=True,
     plot_waveforms=True,
     lune_misfit=False,
     lune_likelihood=False,
@@ -78,6 +80,13 @@ def bench(
         )):
         calculate_norm_data = True
 
+    labels = []
+    if include_bw:
+        labels += ['bw']
+    if include_rayleigh:
+        labels += ['rayleigh']
+    if include_love:
+        labels += ['love']
 
     data_processing = []
     if include_bw:
@@ -215,6 +224,12 @@ def bench(
     #
     print('Generating figures...\n')
 
+    if plot_beachball:
+        print('  plotting beachball...\n')
+
+        _plot_beachball(event_id+'_beachball.png',
+            best_source, stations, origin)
+
     if plot_waveforms:
         print('  plotting waveforms...\n')
 
@@ -232,18 +247,17 @@ def bench(
             best_source,
             source_dict)
 
-
     if lune_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_lune', plot_misfit_lune, results)
+        _map(event_id+'_misfit_lune', labels, plot_misfit_lune, results)
 
     if lune_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_lune', plot_likelihood_lune, results, vars)
+        _map(event_id+'_likelihood_lune', labels, plot_likelihood_lune, results, vars)
 
     if lune_marginal:
         print('  plotting marginal likelihoods...')
-        _map(event_id+'_marginal_lune', plot_marginal_lune, results, vars)
+        _map(event_id+'_marginal_lune', labels, plot_marginal_lune, results, vars)
 
     if lune_variance_reduction:
         pass
@@ -251,28 +265,28 @@ def bench(
 
     if vw_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_vw', plot_misfit_vw, results)
+        _map(event_id+'_misfit_vw', labels, plot_misfit_vw, results)
 
     if vw_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_vw', plot_likelihood_vw, results, vars)
+        _map(event_id+'_likelihood_vw', labels, plot_likelihood_vw, results, vars)
 
     if vw_marginal:
         print('  plotting marginal likelihoods...')
-        _map(event_id+'_marginal_vw', plot_marginal_vw, results, vars)
+        _map(event_id+'_marginal_vw', labels, plot_marginal_vw, results, vars)
 
 
     if dc_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_dc', plot_misfit_dc, results)
+        _map(event_id+'_misfit_dc', labels, plot_misfit_dc, results)
 
     if dc_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_dc', plot_likelihood_dc, results, vars)
+        _map(event_id+'_likelihood_dc', labels, plot_likelihood_dc, results, vars)
 
     if dc_marginal:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_marginal_dc', plot_marginal_dc, results, vars)
+        _map(event_id+'_marginal_dc', labels, plot_marginal_dc, results, vars)
 
 
 
@@ -296,7 +310,7 @@ def bench(
 # graphics
 #
 
-def _map(dirname, func, *sequences, **kwargs):
+def _map(dirname, labels, func, *sequences, **kwargs):
     """ Used to map plotting function onto a sequence of misfit or likelihood
     surfaces
     """
@@ -304,7 +318,7 @@ def _map(dirname, func, *sequences, **kwargs):
     os.makedirs(dirname, exist_ok=True)
 
     for _i, arg_list in enumerate(zip(*sequences)):
-        filename = join(dirname, '%d.png' % _i)
+        filename = join(dirname, '%s.png' % labels[_i])
 
         # call plotting function
         func(filename, *arg_list, **kwargs)
