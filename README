@@ -2,14 +2,14 @@
 Instructions
 ------------
 
-1. Install mtuq within a conda virtual environment following these instructions
+1. Install mtuq within a conda virtual environment as follows
 
     https://uafgeotools.github.io/mtuq/install/index.html
 
 
 2  Within the same virtual environment install mtbench
 
-   >> cd mtbench
+   >> cd mtbench/
    >> pip install -e .
 
 
@@ -34,11 +34,11 @@ Instructions
 Notes
 -----
 
- - AxiSEM and FK scripts closely reproduce published figures, but require local Green's function databases (avilable at University of Alaska Fairbanks)
+ - AxiSEM and FK scripts closely reproduce published figures, but require local Green's function databases (available at University of Alaska Fairbanks)
 
  - syngine scripts do NOT closely reproduce published figures since AK135F is used in place of regional velocity models
 
-- syngine scripts download Green's functions from a remote server, which take a long time. After the initial downloads, Green's function are locally cached, so any subsequent runs will be much faster.
+- syngine scripts download Green's functions from a remote server, which can take a very long time. After the first time a script is run, Green's functions are locally cached, so any subsequent runs will be much faster.
 
 
 
