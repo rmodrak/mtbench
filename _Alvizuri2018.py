@@ -76,7 +76,7 @@ selected_events = [
    3,
    4,
    5,
-   6,
+  #6,
   #7,
   #8,
     ]
@@ -222,6 +222,6 @@ def basepath():
 
 
 def fullpath(*args):
-    return join(basepath(), 'input/Alvizuri2018', *args)
+    return join(basepath(), 'WAVEFORMS/Alvizuri2018', *args)
 
 

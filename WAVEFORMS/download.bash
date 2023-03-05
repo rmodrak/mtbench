@@ -23,12 +23,12 @@ function download() {
 
 
 #
-# expected output from scripts/run_Silwal2016_sygine
+# waveforms from Silwal2016
 #
-download $URL WaveformsSilwal2016 $WD Silwal2016
+#download $URL WaveformsSilwal2016 $WD Silwal2016
 
 
 #
-# expected output from scripts/run_Alvizuri2018_sygine
+# waveforms from Alvizuri2018
 #
-#download $URL WaveformsAlvizuri2018 $WD Alvizuri2018
+download $URL WaveformsAlvizuri2018 $WD Alvizuri2018

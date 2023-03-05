@@ -179,6 +179,6 @@ def basepath():
 
 
 def fullpath(*args):
-    return join(basepath(), 'input/Silwal2016', *args)
+    return join(basepath(), 'WAVEFORMS/Silwal2016', *args)
 
 
