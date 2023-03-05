@@ -233,7 +233,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'dc_misfit',
-            'lune_misfit',
+            'lune_variance_reduction',
             lines)
 
         file.write(lines)
@@ -282,7 +282,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'dc_misfit',
-            'lune_misfit',
+            'lune_variance_reduction',
             lines)
 
         file.write(lines)
@@ -326,7 +326,7 @@ if __name__=='__main__':
 
         lines = re.sub(
             'dc_misfit',
-            'lune_misfit',
+            'lune_variance_reduction',
             lines)
 
         file.write(lines)
