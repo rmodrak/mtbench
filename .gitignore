@@ -3,15 +3,20 @@ __pycache__/
 *.egg-info/
 *.py[cod]
 *.so
+*.tgz
 
 .DS_Store
 *.swp
 
+gmt.conf
 gmt.history
 *.ps
 
-input/
-output/
+FIGURES/Alvizuri2018
+FIGURES/Silwal2016
+
+WAVEFORMS/Alvizuri2018
+WAVEFORMS/Silwal2016
 
 *.h5
 *.nc
