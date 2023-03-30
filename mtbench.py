@@ -11,7 +11,9 @@ from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
     plot_misfit_vw, plot_likelihood_vw, plot_marginal_vw,\
     plot_misfit_dc, plot_likelihood_dc, plot_marginal_dc,\
     plot_variance_reduction_lune, plot_time_shifts, plot_amplitude_ratios,\
+    plot_cdf, plot_pdf, plot_screening_curve,\
     plot_beachball
+from mtuq.grid import UnstructuredGrid
 from mtuq.grid_search import DataArray, DataFrame, grid_search
 from mtuq.misfit import Misfit
 from mtuq.misfit.waveform._stats import estimate_sigma, calculate_norm_data
@@ -60,6 +62,9 @@ def bench(
     dc_misfit=False,
     dc_likelihood=False,
     dc_marginal=False,
+    omega_pdfs=False,
+    omega_cdfs=False,
+    screening_curves=False,
     verbose=True):
 
     """ Carries out a separate grid search for each chosen data type and
@@ -76,6 +81,9 @@ def bench(
         vw_marginal,
         dc_likelihood,
         dc_marginal,
+        omega_cdfs,
+        omega_pdfs,
+        screening_curves,
         )):
         calculate_sigma = True
 
@@ -84,6 +92,15 @@ def bench(
         lune_variance_reduction,
         )):
         calculate_norm_data = True
+
+    if omega_pdfs or omega_cdfs:
+        try:
+            assert type(grid)==UnstructuredGrid
+        except:
+            print('Angular distance CDFs and PDFs require randomly-spaced grid')
+            omega_pdfs = False
+            omega_cdfs = False
+
 
     labels = []
     if include_bw:
@@ -294,6 +311,18 @@ def bench(
         print('  plotting maximum likelihoods...')
         _map(event_id+'_marginal_dc', labels, plot_marginal_dc, results, vars)
 
+
+    if omega_pdfs:
+        print('  plotting angular distance PDFs...')
+        _map(event_id+'_omega', [label+'_pdf' for label in labels], plot_pdf, results, vars)
+
+    if omega_cdfs:
+        print('  plotting angular distance CDFs...')
+        _map(event_id+'_omega', [label+'_cdf' for label in labels], plot_cdf, results, vars)
+
+    if screening_curves:
+        print('  plotting explosion screening curves...')
+        _map(event_id+'_curves', labels, plot_screening_curve, results, vars)
 
 
     #
