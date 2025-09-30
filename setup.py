@@ -1,8 +1,7 @@
-from __future__ import print_function
+
 import argparse
 import os
 import sys
-import numpy
 from setuptools import find_packages, setup, Extension
 from setuptools.command.test import test as test_command
 
@@ -17,7 +16,7 @@ setup(
     keywords=[
         "seismology"
     ],
-    python_requires='~=3.5',
+    python_requires='>=3',
     install_requires=[
         "numpy", "scipy", "obspy", 
         "h5py", "retry", "flake8>=3.0", "pytest", "nose",
