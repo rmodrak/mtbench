@@ -3,7 +3,8 @@
 import os
 import numpy as np
 import warnings
-from os.path import join
+from os.path import exists, join
+from math import prod
 
 from mtuq import read, open_db, download_greens_tensors
 from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
@@ -14,7 +15,7 @@ from mtuq.graphics import plot_data_greens1, plot_data_greens2,\
     plot_cdf, plot_pdf, plot_screening_curve,\
     plot_beachball
 from mtuq.grid import UnstructuredGrid
-from mtuq.grid_search import DataArray, DataFrame, grid_search
+from mtuq.grid_search import DataArray, DataFrame, grid_search, MTUQDataArray
 from mtuq.misfit import Misfit
 from mtuq.misfit.waveform._stats import estimate_sigma, calculate_norm_data
 from mtuq.util.cap import parse_station_codes, Trapezoid
@@ -52,7 +53,7 @@ def bench(
     save_misfit=False,
     plot_beachball=True,
     plot_waveforms=True,
-    lune_misfit=False,
+    lune_misfit=True,
     lune_likelihood=False,
     lune_marginal=False,
     lune_variance_reduction=False,
@@ -65,6 +66,8 @@ def bench(
     omega_pdfs=False,
     omega_cdfs=False,
     screening_curves=False,
+    station_contributions=True,
+    path_output='.',
     verbose=True):
 
     """ Carries out a separate grid search for each chosen data type and
@@ -127,10 +130,17 @@ def bench(
         misfit_functions += [_get_misfit_love(minmax_sw)]
 
 
+    if not path_output:
+        path_output = './'
+
+    if not exists(path_output):
+        os.makedirs(path_output, exist_ok=True)
+
     if verbose:
         print('event:   %s' % event_id)
         print('data:    %s' % path_data)
-        print('weights: %s\n' % path_weights)
+        print('weights: %s' % path_weights)
+        print('output:  %s\n'% path_output)
 
     ntasks = int(include_bw)+\
              int(include_rayleigh)+\
@@ -180,20 +190,67 @@ def bench(
 
     print('Evaluating misfit...\n')
 
-    results = []
+    # holds misfit surfaces from each individual stations and data type
+    station_array = []
+
+    # sum over stations to obtain misfit surfaces from each individual data type
+    results_sum = []
+
     for _i, misfit in enumerate(misfit_functions):
         task(_i, ntasks)
-        results += [grid_search(processed_data[_i], processed_greens[_i], 
-                                misfit, origin, grid)]
+        station_array += [[]]
+
+        for _j, station in enumerate(stations):
+            print(f'\n  {station.id}\n')
+
+            station_array[-1] += [grid_search(
+                processed_data[_i].select(station), processed_greens[_i].select(station), 
+                misfit, origin, grid, verbose=0)]
+
+        results_sum += [MTUQDataArray(**{
+            'data': np.sum(station_array[-1], axis=0)/len(stations),
+            'coords': station_array[-1][0].coords,
+            'dims': station_array[-1][0].dims,
+            })]
+
+    if calculate_norm_data:
+        print('  calculating data norm...\n')
+    
+        norms = []
+        for _i, misfit in enumerate(misfit_functions):
+    
+            groups = misfit.time_shift_groups
+            if len(groups) > 1:
+               print('Too many time shift groups. Skipping...')
+               continue
+
+            components = []
+            for component in groups[0]:
+               components += [component]
+
+            norms += [_calculate_norm_data(processed_data[_i], misfit.norm, components)]
+
+            _write(event_id+'_'+str(_i)+'.norm_data', norms[-1])
+
+
+    if include_rayleigh and include_love:
+        idx_rayleigh = labels.index('rayleigh')
+        idx_love = labels.index('love')
+
+        results_sum += [results_sum[idx_rayleigh] + results_sum[idx_love]]
+        norms += [2.]
+        labels += ['rayleigh+love']
+
+        #results_sum += [sum([results_sum[_i]*norms[_i] for _i in range(len(results_sum))])]
+        #norms += [norms[idx_rayleigh] + norms[idx_love]]
+        #labels += ['rayleigh+love_2']
+
 
     # what index corresponds to minimum misfit?
-    results_sum = sum(results)
-
-    idx = results_sum.source_idxmin()
-
+    results_weighted = sum([results_sum[_i]*norms[_i] for _i in range(len(results_sum))])
+    idx = results_weighted.source_idxmin()
     best_source = grid.get(idx)
     source_dict = grid.get_dict(idx)
-
 
     if calculate_sigma:
         print('  estimating variance...\n')
@@ -221,26 +278,6 @@ def bench(
             _write(event_id+'_'+str(_i)+'.sigma', devs[-1])
 
 
-    if calculate_norm_data:
-        print('  calculating data norm...\n')
-
-        norms = []
-        for _i, misfit in enumerate(misfit_functions):
-
-            groups = misfit.time_shift_groups
-            if len(groups) > 1:
-               print('Too many time shift groups. Skipping...')
-               continue
-
-            components = []
-            for component in groups[0]:
-               components += [component]
-
-            norms += [_calculate_norm_data(processed_data[_i], misfit.norm, components)]
-
-            _write(event_id+'_'+str(_i)+'.norm_data', norms[-1])
-
-
     #
     # Generating figures
     #
@@ -249,13 +286,13 @@ def bench(
     if plot_beachball:
         print('  plotting beachball...\n')
 
-        _plot_beachball(event_id+'_beachball.png',
+        _plot_beachball(path_output+'/'+event_id+'_beachball.png',
             best_source, stations, origin)
 
     if plot_waveforms:
         print('  plotting waveforms...\n')
 
-        _plot_waveforms(event_id+'_waveforms.png',
+        _plot_waveforms(path_output+'/'+event_id+'_waveforms.png',
             processed_data,
             processed_greens,
             include_bw,
@@ -271,58 +308,71 @@ def bench(
 
     if lune_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_lune', labels, plot_misfit_lune, results)
+        _map(path_output+'/'+event_id+'_misfit_lune', labels, plot_misfit_lune, results_sum)
 
     if lune_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_lune', labels, plot_likelihood_lune, results, vars)
+        _map(path_output+'/'+event_id+'_likelihood_lune', labels, plot_likelihood_lune, results_sum, vars)
 
     if lune_marginal:
         print('  plotting marginal likelihoods...')
-        _map(event_id+'_marginal_lune', labels, plot_marginal_lune, results, vars)
+        _map(path_output+'/'+event_id+'_marginal_lune', labels, plot_marginal_lune, results_sum, vars)
 
     if lune_variance_reduction:
         print('  plotting variance reduction...')
-        _map(event_id+'_variance_reduction', labels, plot_variance_reduction_lune, results, norms)
+        _map(path_output+'/'+event_id+'_variance_reduction', labels, plot_variance_reduction_lune, results_sum, [1. for _ in range(len(results_sum))])
 
 
     if vw_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_vw', labels, plot_misfit_vw, results)
+        _map(path_output+'/'+event_id+'_misfit_vw', labels, plot_misfit_vw, results_sum)
 
     if vw_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_vw', labels, plot_likelihood_vw, results, vars)
+        _map(path_output+'/'+event_id+'_likelihood_vw', labels, plot_likelihood_vw, results_sum, vars)
 
     if vw_marginal:
         print('  plotting marginal likelihoods...')
-        _map(event_id+'_marginal_vw', labels, plot_marginal_vw, results, vars)
+        _map(path_output+'/'+event_id+'_marginal_vw', labels, plot_marginal_vw, results_sum, vars)
 
 
     if dc_misfit:
         print('  plotting misfit...')
-        _map(event_id+'_misfit_dc', labels, plot_misfit_dc, results)
+        _map(path_output+'/'+event_id+'_misfit_dc', labels, plot_misfit_dc, results_sum)
 
     if dc_likelihood:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_likelihood_dc', labels, plot_likelihood_dc, results, vars)
+        _map(path_output+'/'+event_id+'_likelihood_dc', labels, plot_likelihood_dc, results_sum, vars)
 
     if dc_marginal:
         print('  plotting maximum likelihoods...')
-        _map(event_id+'_marginal_dc', labels, plot_marginal_dc, results, vars)
+        _map(path_output+'/'+event_id+'_marginal_dc', labels, plot_marginal_dc, results_sum, vars)
 
 
     if omega_pdfs:
         print('  plotting angular distance PDFs...')
-        _map(event_id+'_omega', [label+'_pdf' for label in labels], plot_pdf, results, vars)
+        _map(path_output+'/'+event_id+'_omega', [label+'_pdf' for label in labels], plot_pdf, results_sum, vars)
 
     if omega_cdfs:
         print('  plotting angular distance CDFs...')
-        _map(event_id+'_omega', [label+'_cdf' for label in labels], plot_cdf, results, vars)
+        _map(path_output+'/'+event_id+'_omega', [label+'_cdf' for label in labels], plot_cdf, results_sum, vars)
 
     if screening_curves:
         print('  plotting explosion screening curves...')
-        _map(event_id+'_curves', labels, plot_screening_curve, results, vars)
+        _map(path_output+'/'+event_id+'_curves', labels, plot_screening_curve, results_sum, vars)
+
+
+    if station_contributions:
+        os.makedirs(path_output+'/'+event_id+f'_station_contributions',exist_ok=True)
+
+        for _i, station in enumerate(stations):
+            plot_variance_reduction_lune(
+                path_output+'/'+event_id+f'_station_contributions/rayleigh_{station.id}.png',
+                station_array[0][_i],[1.], title=station.id)
+    
+            plot_variance_reduction_lune(
+                path_output+'/'+event_id+f'_station_contributions/love_{station.id}.png',
+                station_array[1][_i],[1.], title=station.id)
 
 
     #
@@ -332,7 +382,7 @@ def bench(
     if save_misfit:
         print('Saving results...\n')
 
-        for _i, ds in enumerate(results):
+        for _i, ds in enumerate(results_sum):
             task(_i, ntasks)
             _save(event_id+'_'+str(_i), ds)
 
@@ -427,6 +477,8 @@ def _get_misfit_rayleigh(minmax):
         time_shift_min=minmax[0],
         time_shift_max=minmax[1],
         time_shift_groups=['ZR'],
+        normalize=True,
+        verbose=0,
         )
 
 def _get_misfit_love(minmax):
@@ -435,6 +487,8 @@ def _get_misfit_love(minmax):
         time_shift_min=minmax[0],
         time_shift_max=minmax[1],
         time_shift_groups=['T'],
+        normalize=True,
+        verbose=0,
         )
 
 def _get_misfit_bw(minmax):
@@ -443,6 +497,8 @@ def _get_misfit_bw(minmax):
         time_shift_min=minmax[0],
         time_shift_max=minmax[1],
         time_shift_groups=['ZR'],
+        normalize=True,
+        verbose=0,
         )
 
 def _get_misfit_sw(minmax):
@@ -451,5 +507,7 @@ def _get_misfit_sw(minmax):
         time_shift_min=minmax[0],
         time_shift_max=minmax[1],
         time_shift_groups=['ZR','T'],
+        normalize=True,
+        verbose=0,
         )
 
